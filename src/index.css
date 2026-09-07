@@ -1,0 +1,500 @@
+@import "tailwindcss";
+
+/*
+  Design tokens (ready-check-frontend-mockup-spec.md §3).
+  Spec token  ->  utility
+    bg-base      ->  bg-base
+    bg-surface   ->  bg-surface
+    bg-raised    ->  bg-raised
+    border       ->  border-line
+    text-primary ->  text-ink
+    text-muted   ->  text-ink-muted
+    signal       ->  text-signal / bg-signal / border-signal
+    ember        ->  text-ember / ...
+  Never hardcode these hex values anywhere else.
+*/
+@theme {
+  --color-base: #10121a;
+  --color-surface: #191c29;
+  --color-raised: #222639;
+  --color-line: #2e3244;
+  --color-ink: #edeff5;
+  --color-ink-muted: #8b90a3;
+  --color-signal: #4ce0d2;
+  --color-ember: #ff6b3d;
+
+  /* Rank-tier ramp - one shared system across every module */
+  --color-bronze: #b5793e;
+  --color-silver: #a9afc0;
+  --color-gold: #e4b94e;
+  --color-platinum: #4fc3b0;
+  --color-diamond: #8c7be0;
+
+  --font-display: "Rajdhani", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-base: 6px;
+
+  --text-display-xl: 40px;
+  --text-display-xl--line-height: 44px;
+  --text-display-l: 28px;
+  --text-display-l--line-height: 32px;
+  --text-display-m: 20px;
+  --text-display-m--line-height: 24px;
+  --text-body-l: 16px;
+  --text-body-l--line-height: 26px;
+  --text-body-m: 14px;
+  --text-body-m--line-height: 22px;
+  --text-body-s: 12px;
+  --text-body-s--line-height: 18px;
+  --text-mono-m: 14px;
+  --text-mono-m--line-height: 20px;
+  --text-mono-l: 22px;
+  --text-mono-l--line-height: 26px;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body-m);
+    line-height: var(--text-body-m--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tabular figures so columns of numbers align (spec §3, typography). */
+  .font-mono,
+  code,
+  kbd {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Visible focus ring in signal, 2px, offset - never removed without a
+     replacement (spec §8). */
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-signal) 35%, transparent);
+  }
+}
+
+@layer components {
+  /* The one bold structural device (spec §3). Applied only through
+     <AngularPanel> so it stays an accent, not a theme. */
+  .angular-cut {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      0 100%
+    );
+  }
+}
+
+/* Motion: one orchestrated moment, plus fast state changes (spec §7). */
+@keyframes live-strip-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    border-color: var(--color-line);
+  }
+  50% {
+    border-color: var(--color-signal);
+  }
+}
+
+.animate-live-strip-in {
+  animation: live-strip-in 260ms ease-out;
+}
+
+/* Pulses a few times on state change, then settles - it should not stay
+   distracting for the next two hours of play. */
+.animate-live-pulse {
+  animation: live-pulse 1.4s ease-in-out 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reveals must not depend on an animation that no longer runs. */
+  .reveal {
+    opacity: 1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Bold pass: animated polygon backdrop, HUD panels, entrance reveals.
+   The spec's "one orchestrated moment" rule was deliberately relaxed here at
+   the product owner's direction - see CLAUDE.md.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  --shadow-glow-signal: 0 0 0 1px color-mix(in oklab, var(--color-signal) 45%, transparent),
+    0 0 24px -6px color-mix(in oklab, var(--color-signal) 60%, transparent);
+  --shadow-glow-ember: 0 0 0 1px color-mix(in oklab, var(--color-ember) 45%, transparent),
+    0 0 24px -6px color-mix(in oklab, var(--color-ember) 60%, transparent);
+}
+
+@layer components {
+  /* A HUD label: the one place all-caps earns its keep in the bold pass. */
+  .hud-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-body-s);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Corner ticks, the way a broadcast overlay frames a stat block. */
+  .hud-corners::before,
+  .hud-corners::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-color: var(--color-signal);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+  .hud-corners::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+  .hud-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+  }
+
+  /* A diagonal light sweep, triggered on hover or run once on a hero. */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      color-mix(in oklab, var(--color-ink) 12%, transparent) 50%,
+      transparent 65%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+  .sheen:hover::after,
+  .sheen-run::after {
+    animation: sheen-sweep 900ms ease-out;
+  }
+
+  /* Fine scanline film over hero art. */
+  .scanlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-ink) 5%, transparent) 0 1px,
+      transparent 1px 3px
+    );
+    opacity: 0.35;
+  }
+}
+
+@keyframes sheen-sweep {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* Entrance reveal - opacity + lift, staggered by inline animation-delay. */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: reveal-up 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Backdrop motion. */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -3%, 0) scale(1.08);
+  }
+}
+
+@keyframes shard-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) rotate(6deg);
+  }
+}
+
+/* Live indicators. */
+@keyframes pip {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  70% {
+    opacity: 0.65;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.animate-pip {
+  animation: pip 1.6s ease-out infinite;
+}
+
+/* Ticker marquee - the track holds two copies of the content. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Bars that grow from zero on reveal. */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-bar {
+  transform-origin: left;
+  animation: bar-grow 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Column charts grow from their baseline, not from the left edge. */
+@keyframes bar-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.animate-bar-y {
+  transform-origin: bottom;
+  animation: bar-grow-y 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The rotation strip's dwell indicator. */
+@keyframes dwell {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Hero slide swap - a short fade and lift, not a slideshow wipe. */
+@keyframes hero-swap {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-hero-swap {
+  animation: hero-swap 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---------------------------------------------------------------------------
+   Button outline spin: a bright segment travels the perimeter exactly once on
+   hover or keyboard focus, then stops. Registering the angle as a typed custom
+   property is what makes it interpolate - a plain `--angle` would jump rather
+   than sweep.
+   --------------------------------------------------------------------------- */
+@property --spin-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer components {
+  .spin-ring {
+    position: relative;
+  }
+
+  /* A 1px ring just outside the button: a conic gradient masked down to its
+     own border box, so the lit segment follows the rounded corners. */
+  .spin-ring::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--radius-base) + 1px);
+    padding: 1px;
+    background: conic-gradient(
+      from var(--spin-angle),
+      transparent 0deg,
+      var(--spin-color, var(--color-signal)) 22deg,
+      transparent 62deg,
+      transparent 360deg
+    );
+    /* The shorthand resets mask-composite, so composite is set after it. */
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .spin-ring:hover::after,
+  .spin-ring:focus-visible::after {
+    animation: spin-outline 720ms cubic-bezier(0.32, 0, 0.2, 1) 1;
+  }
+
+  /* Disabled controls do not invite a pointer, so they do not react to one. */
+  .spin-ring:disabled::after {
+    animation: none;
+  }
+}
+
+@keyframes spin-outline {
+  0% {
+    --spin-angle: 0deg;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    --spin-angle: 360deg;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Backdrop layers. Everything here animates transform or opacity only, so it
+   stays on the compositor — see the backdrop performance notes in CLAUDE.md.
+   --------------------------------------------------------------------------- */
+
+/* A broadcast-style sweep crossing the field on a long cycle. */
+@keyframes scan-sweep {
+  0% {
+    transform: translate3d(-70%, 0, 0) rotate(12deg);
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(170%, 0, 0) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+/* Dust motes: a slow drift with a breath of opacity so they don't read as a
+   fixed pattern of dots. */
+@keyframes mote {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate3d(6px, -26px, 0);
+    opacity: 0.85;
+  }
+}
+
+/* Vertices that wake up one at a time, so the mesh reads as a live network. */
+@keyframes node-pulse {
+  0%,
+  70%,
+  100% {
+    opacity: 0.15;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+
+/* Instrument rings, slow enough to read as ambient rather than as a spinner. */
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
