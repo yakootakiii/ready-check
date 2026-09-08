@@ -4,18 +4,38 @@ import GameTile from '../components/GameTile'
 import LiveViewer from '../components/LiveViewer'
 import DiagnosticChecklist from '../components/DiagnosticChecklist'
 import Reveal from '../components/Reveal'
-import { Countdown, HudLabel, HudPageHeader, HudPanel, HudSection, LivePip } from '../components/hud'
+import { MatchupMeter } from '../components/MatchupBars'
+import { InsightBullet } from '../components/InsightCard'
+import {
+  Countdown,
+  FormRow,
+  HudLabel,
+  HudPageHeader,
+  HudPanel,
+  HudSection,
+  LivePip,
+} from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
-import { ArrowRight, Bracket, Broadcast } from '../components/icons'
+import { ArrowRight, Bracket, Broadcast, Target } from '../components/icons'
 import { useLiveMatch } from '../live'
 import { useGame } from '../gameContext'
 import { GAMES_BY_ID, genreOf } from '../data/games'
-import { liveMatchesFor, teamsFor } from '../data/generate'
+import { liveMatchesFor } from '../data/generate'
+import { nextFixture } from '../data/matchup'
 import { diagnosticsFor } from '../data/checks'
 import { player } from '../data/mock'
-import { tier as tierOf } from '../tiers'
 
-export default function Live() {
+/**
+ * The match centre: the screen that is open while a series is being played.
+ *
+ * What is new here is the pre-match brief. In the old product this screen
+ * checked your ping and your microphone and then wished you luck; the useful
+ * thing to have on screen ten minutes before a game is what the opponent is
+ * likely to do and the one dimension you are behind on. Hardware checks are
+ * still here - they matter - but they are now the second panel rather than the
+ * only one.
+ */
+export default function MatchCentre() {
   const { isLive, setIsLive } = useLiveMatch()
   const { game } = useGame()
   const navigate = useNavigate()
@@ -24,9 +44,12 @@ export default function Live() {
   const matches = liveMatchesFor(active.id)
   const [feedId, setFeedId] = useState(matches[0].id)
   const feed = matches.find((m) => m.id === feedId) ?? matches[0]
+
   const diagnostics = diagnosticsFor(active.platform)
   const warnings = diagnostics.filter((d) => d.state !== 'pass')
-  const opponent = teamsFor(active.id)[1]
+
+  const fixture = nextFixture(active.id)
+  const m = fixture.matchup
 
   return (
     <div className="space-y-10">
@@ -44,7 +67,7 @@ export default function Live() {
                 Go live
               </Button>
             )}
-            <Button onClick={() => navigate(`/compete/brackets/${active.id}`)}>
+            <Button onClick={() => navigate(`/compete/tournaments/${active.id}`)}>
               <Bracket />
               Bracket
             </Button>
@@ -60,38 +83,101 @@ export default function Live() {
         <Reveal>
           <HudPanel className="p-6">
             <div className="flex flex-wrap items-start justify-between gap-6">
-              <div>
+              <div className="min-w-56">
                 <HudLabel>Next up</HudLabel>
                 <div className="mt-2 font-display text-display-l font-bold text-ink">
-                  vs. {opponent.name}
+                  vs. {fixture.opponent.name}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-body-m">
                   <GameTile game={active} size="s" />
-                  <span className={tierOf(opponent.tier).text}>
-                    {tierOf(opponent.tier).label}
-                  </span>
+                  <span className="text-signal">{m.theirs.identity}</span>
                   <span className="text-ink-muted">
-                    · {opponent.region} · {active.teamSize === 1 ? 'FT5' : 'Bo3'}
+                    · {fixture.opponent.region} · {fixture.format}
                   </span>
                 </div>
+                <FormRow form={fixture.opponent.form} className="mt-4" />
               </div>
               <div>
                 <HudLabel className="mb-2">Starts in</HudLabel>
-                <Countdown seconds={11 * 3600 + 24 * 60} />
+                <Countdown seconds={fixture.startsInSeconds} />
               </div>
             </div>
           </HudPanel>
         </Reveal>
       )}
 
-      {/* Pre-match check ---------------------------------------------------- */}
+      {/* The brief ---------------------------------------------------------- */}
       <section>
         <HudSection
-          eyebrow={`${active.platform} readiness`}
-          title="Pre-match check"
+          eyebrow="Ten minutes out"
+          title="Pre-match brief"
           action={
-            <Button variant="ghost" onClick={() => navigate('/compete/diagnostics')}>
-              Full diagnostics
+            <Button variant="ghost" onClick={() => navigate('/matchup')}>
+              Full matchup intelligence
+              <ArrowRight />
+            </Button>
+          }
+        />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Reveal>
+            <HudPanel className="h-full p-5">
+              <HudLabel className="text-ember">Their game</HudLabel>
+              <ul className="mt-3 space-y-2.5">
+                {m.theirStrengths.map((item) => (
+                  <InsightBullet key={item.key} tone="ember">
+                    {item.text}
+                  </InsightBullet>
+                ))}
+              </ul>
+              <p className="mt-4 border-t border-line pt-3 text-body-s text-ink-muted">
+                Expected tempo: <span className="text-ink">{m.expectedTempo.label}</span>.{' '}
+                {m.expectedTempo.note}
+              </p>
+            </HudPanel>
+          </Reveal>
+
+          <Reveal delay={80}>
+            <HudPanel className="h-full p-5">
+              <HudLabel className="text-edge">Where you are ahead</HudLabel>
+              <div className="mt-3 space-y-4">
+                {m.dimensions
+                  .filter((d) => d.favour !== 'even')
+                  .slice(0, 3)
+                  .map((dim) => (
+                    <MatchupMeter key={dim.key} dimension={dim} />
+                  ))}
+              </div>
+            </HudPanel>
+          </Reveal>
+
+          <Reveal delay={160}>
+            <HudPanel className="h-full p-5">
+              <HudLabel>The one thing</HudLabel>
+              <p className="mt-3 text-body-l text-ink">
+                {m.prepFocus[0]?.action ?? 'No dimension where they hold a meaningful advantage.'}
+              </p>
+              <Button
+                variant="ghost"
+                className="mt-4 px-0"
+                onClick={() => navigate(`/matchup/opponents/${fixture.opponent.id}`)}
+              >
+                <Target />
+                Their full profile
+                <ArrowRight />
+              </Button>
+            </HudPanel>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Setup -------------------------------------------------------------- */}
+      <section>
+        <HudSection
+          eyebrow={`${active.platform} hardware`}
+          title="Setup check"
+          action={
+            <Button variant="ghost" onClick={() => navigate('/compete/setup')}>
+              Full check
               <ArrowRight />
             </Button>
           }
@@ -119,7 +205,7 @@ export default function Live() {
             {isLive ? (
               <div className="flex flex-wrap items-center gap-6">
                 <span className="flex items-center gap-2">
-                  <LivePip className="text-signal" />
+                  <LivePip className="text-edge" />
                   <span className="text-body-m text-ink">Connected to team channel</span>
                 </span>
                 <div className="flex items-center gap-2">

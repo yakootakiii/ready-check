@@ -1,7 +1,20 @@
 @import "tailwindcss";
 
 /*
-  Design tokens (ready-check-frontend-mockup-spec.md §3).
+  Outplay design tokens (outplay-product-brief.md §Visual direction).
+
+  The palette carries meaning, not decoration. Three accents do almost all the
+  work, and each one means the same thing on every screen:
+
+    signal  ->  you / your side / the intelligence layer
+    ember   ->  the opponent, anything live, and anything the system is
+                warning you about
+    edge    ->  an advantage: a favourable matchup dimension, a positive
+                delta, a win
+
+  A matchup screen is therefore readable before a word of it is: blue is your
+  shape, orange is theirs, green is where you are ahead.
+
   Spec token  ->  utility
     bg-base      ->  bg-base
     bg-surface   ->  bg-surface
@@ -9,28 +22,32 @@
     border       ->  border-line
     text-primary ->  text-ink
     text-muted   ->  text-ink-muted
-    signal       ->  text-signal / bg-signal / border-signal
-    ember        ->  text-ember / ...
+
   Never hardcode these hex values anywhere else.
 */
 @theme {
-  --color-base: #10121a;
-  --color-surface: #191c29;
-  --color-raised: #222639;
-  --color-line: #2e3244;
-  --color-ink: #edeff5;
-  --color-ink-muted: #8b90a3;
-  --color-signal: #4ce0d2;
-  --color-ember: #ff6b3d;
+  --color-base: #0a0c12;
+  --color-surface: #12151f;
+  --color-raised: #1a1e2b;
+  --color-line: #262b3b;
+  --color-ink: #eef1f8;
+  --color-ink-muted: #8b93ab;
 
-  /* Rank-tier ramp - one shared system across every module */
-  --color-bronze: #b5793e;
-  --color-silver: #a9afc0;
-  --color-gold: #e4b94e;
-  --color-platinum: #4fc3b0;
-  --color-diamond: #8c7be0;
+  --color-signal: #6c8cff;
+  --color-ember: #ff6b4a;
+  --color-edge: #35d6a4;
 
-  --font-display: "Rajdhani", system-ui, sans-serif;
+  /* Rank-tier ramp. Rank is a secondary readout in Outplay - Competitive DNA
+     leads - but the ramp is still one shared system across every module. */
+  --color-bronze: #c08552;
+  --color-silver: #a9b0c4;
+  --color-gold: #e5bc55;
+  --color-platinum: #4fd1c5;
+  --color-diamond: #b98cff;
+
+  /* Space Grotesk reads technical rather than arcade: the product has to be
+     credible to a coach and a recruiter, not only to a player. */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
@@ -52,6 +69,13 @@
   --text-mono-m--line-height: 20px;
   --text-mono-l: 22px;
   --text-mono-l--line-height: 26px;
+
+  --shadow-glow-signal: 0 0 0 1px color-mix(in oklab, var(--color-signal) 45%, transparent),
+    0 0 28px -8px color-mix(in oklab, var(--color-signal) 60%, transparent);
+  --shadow-glow-ember: 0 0 0 1px color-mix(in oklab, var(--color-ember) 45%, transparent),
+    0 0 28px -8px color-mix(in oklab, var(--color-ember) 60%, transparent);
+  --shadow-glow-edge: 0 0 0 1px color-mix(in oklab, var(--color-edge) 45%, transparent),
+    0 0 28px -8px color-mix(in oklab, var(--color-edge) 60%, transparent);
 }
 
 @layer base {
@@ -68,7 +92,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Tabular figures so columns of numbers align (spec §3, typography). */
+  /* Tabular figures so columns of numbers align. */
   .font-mono,
   code,
   kbd {
@@ -76,7 +100,7 @@
   }
 
   /* Visible focus ring in signal, 2px, offset - never removed without a
-     replacement (spec §8). */
+     replacement. */
   :focus-visible {
     outline: 2px solid var(--color-signal);
     outline-offset: 2px;
@@ -89,8 +113,8 @@
 }
 
 @layer components {
-  /* The one bold structural device (spec §3). Applied only through
-     <AngularPanel> so it stays an accent, not a theme. */
+  /* The one bold structural device. Applied only through <AngularPanel> so it
+     stays an accent, not a theme. */
   .angular-cut {
     clip-path: polygon(
       0 0,
@@ -100,70 +124,8 @@
       0 100%
     );
   }
-}
 
-/* Motion: one orchestrated moment, plus fast state changes (spec §7). */
-@keyframes live-strip-in {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes live-pulse {
-  0%,
-  100% {
-    border-color: var(--color-line);
-  }
-  50% {
-    border-color: var(--color-signal);
-  }
-}
-
-.animate-live-strip-in {
-  animation: live-strip-in 260ms ease-out;
-}
-
-/* Pulses a few times on state change, then settles - it should not stay
-   distracting for the next two hours of play. */
-.animate-live-pulse {
-  animation: live-pulse 1.4s ease-in-out 3;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Reveals must not depend on an animation that no longer runs. */
-  .reveal {
-    opacity: 1;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   Bold pass: animated polygon backdrop, HUD panels, entrance reveals.
-   The spec's "one orchestrated moment" rule was deliberately relaxed here at
-   the product owner's direction - see CLAUDE.md.
-   --------------------------------------------------------------------------- */
-
-@theme {
-  --shadow-glow-signal: 0 0 0 1px color-mix(in oklab, var(--color-signal) 45%, transparent),
-    0 0 24px -6px color-mix(in oklab, var(--color-signal) 60%, transparent);
-  --shadow-glow-ember: 0 0 0 1px color-mix(in oklab, var(--color-ember) 45%, transparent),
-    0 0 24px -6px color-mix(in oklab, var(--color-ember) 60%, transparent);
-}
-
-@layer components {
-  /* A HUD label: the one place all-caps earns its keep in the bold pass. */
+  /* A HUD label: the one place all-caps earns its keep. */
   .hud-label {
     font-family: var(--font-display);
     font-weight: 700;
@@ -232,6 +194,25 @@
     );
     opacity: 0.35;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion.
+   --------------------------------------------------------------------------- */
+
+@keyframes live-strip-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-live-strip-in {
+  animation: live-strip-in 260ms ease-out;
 }
 
 @keyframes sheen-sweep {
@@ -331,6 +312,27 @@
   animation: bar-grow 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* A matchup bar grows out from the centre line, because the thing being read
+   is the gap between two sides, not either side's absolute score. */
+@keyframes bar-grow-center {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-bar-left {
+  transform-origin: right;
+  animation: bar-grow-center 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bar-right {
+  transform-origin: left;
+  animation: bar-grow-center 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Column charts grow from their baseline, not from the left edge. */
 @keyframes bar-grow-y {
   from {
@@ -346,30 +348,48 @@
   animation: bar-grow-y 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* The rotation strip's dwell indicator. */
-@keyframes dwell {
+/* A DNA shape draws itself in rather than appearing, so the profile reads as
+   something the system computed rather than a static graphic. */
+@keyframes trace {
   from {
-    transform: scaleX(0);
+    stroke-dashoffset: var(--trace-length, 1000);
   }
   to {
-    transform: scaleX(1);
+    stroke-dashoffset: 0;
   }
 }
 
-/* Hero slide swap - a short fade and lift, not a slideshow wipe. */
-@keyframes hero-swap {
+.animate-trace {
+  stroke-dasharray: var(--trace-length, 1000);
+  animation: trace 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
-    opacity: 1;
-    transform: none;
+    opacity: var(--fade-to, 1);
   }
 }
 
-.animate-hero-swap {
-  animation: hero-swap 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.animate-fade-in {
+  animation: fade-in 700ms ease-out both;
+}
+
+/* The intelligence pipeline's flow indicator: a pulse travelling down the
+   stack, one stage at a time. */
+@keyframes stage-pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  18% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.35;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -447,7 +467,7 @@
 
 /* ---------------------------------------------------------------------------
    Backdrop layers. Everything here animates transform or opacity only, so it
-   stays on the compositor — see the backdrop performance notes in CLAUDE.md.
+   stays on the compositor - see the backdrop performance notes in CLAUDE.md.
    --------------------------------------------------------------------------- */
 
 /* A broadcast-style sweep crossing the field on a long cycle. */
@@ -496,5 +516,25 @@
 @keyframes ring-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Reveals must not depend on an animation that no longer runs. */
+  .reveal {
+    opacity: 1;
+  }
+
+  /* A traced shape must end up drawn, not left as an invisible dashed path. */
+  .animate-trace {
+    stroke-dasharray: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

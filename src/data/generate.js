@@ -42,14 +42,6 @@ const CIRCUITS = [
   'Metro Championship', 'Rising Circuit', 'Island Cup', 'Pasko Showdown',
 ]
 
-const NEWS_TEMPLATES = [
-  { tag: 'Roster', text: (g, a, p) => `${a} promote ${p} to the starting ${g.roles[0].toLowerCase()} ahead of the final` },
-  { tag: 'Transfer', text: (g, a, p) => `${p} leaves ${a} after two splits — free agent ahead of the ${g.short} window` },
-  { tag: 'Event', text: (g) => `${g.name} circuit adds a ${g.regions[g.regions.length - 1]} qualifier for the new season` },
-  { tag: 'Patch', text: (g) => `Balance pass shakes up the ${g.roles[1].toLowerCase()} pool in competitive ${g.short}` },
-  { tag: 'Analysis', text: (g, a) => `How ${a} turned a bottom-four ${g.unit.toLowerCase()} record into a playoff run` },
-  { tag: 'Scene', text: (g) => `${g.regions[0]} keeps producing ${g.short} talent — inside the amateur pipeline` },
-]
 
 /** Small deterministic PRNG; every generator seeds it from the game id. */
 function rng(seed) {
@@ -292,24 +284,6 @@ export function eventsFor(gameId) {
   })
 }
 
-export function newsFor(gameId) {
-  return memo(`news:${gameId}`, () => {
-    const game = GAMES_BY_ID[gameId]
-    const rand = rng(seedFrom('news', gameId))
-    const teams = teamsFor(gameId)
-    const players = playersFor(gameId)
-    const times = ['2h ago', '5h ago', '9h ago', '1d ago', '1d ago', '2d ago']
-
-    return pick(NEWS_TEMPLATES, 4, rand).map((template, i) => ({
-      id: `${gameId}-nw${i}`,
-      gameId,
-      tag: template.tag,
-      headline: template.text(game, teams[i % teams.length].name, players[i % players.length].name),
-      time: times[i],
-    }))
-  })
-}
-
 /** Aggregates one generator across every title, for the "All games" view. */
 export function acrossGames(generator, { limit, sortBy } = {}) {
   let rows = GAMES.flatMap((game) => generator(game.id))
@@ -381,11 +355,6 @@ export function bracketFor(gameId, eventId) {
   })
 }
 
-/** The events of a title that are actually running right now. */
-export function ongoingFor(gameId) {
-  return eventsFor(gameId).filter((e) => e.status === 'live')
-}
-
 /** How much circuit activity a title has, for the bracket picker cards. */
 export function circuitSummaryFor(gameId) {
   return memo(`circuit:${gameId}`, () => {
@@ -399,4 +368,20 @@ export function circuitSummaryFor(gameId) {
       nextStage: live[0]?.stage ?? events[0]?.stage,
     }
   })
+}
+
+/**
+ * A ladder player by id, across every title.
+ *
+ * Ids are `${gameId}-p${n}`, so the title is recoverable from the id and only
+ * that one scene has to be generated - scanning all twenty-five to find one
+ * row would build every ladder in the app to answer a single lookup.
+ */
+export function findPlayer(playerId = '') {
+  const gameId = GAMES.map((g) => g.id)
+    .filter((id) => playerId.startsWith(`${id}-p`))
+    // Longest match wins: `cs2-p1` and `cs2` are fine, but a future id that is
+    // a prefix of another would otherwise resolve to the wrong scene.
+    .sort((a, b) => b.length - a.length)[0]
+  return gameId ? (playersFor(gameId).find((p) => p.id === playerId) ?? null) : null
 }

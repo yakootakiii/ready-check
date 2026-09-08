@@ -3,6 +3,14 @@ import DiagnosticChecklist from '../components/DiagnosticChecklist'
 import GameTile from '../components/GameTile'
 import Reveal from '../components/Reveal'
 import { HudLabel, HudPageHeader, HudPanel, HudSection, StatBar } from '../components/hud'
+/**
+ * Hardware and connection checks before a match.
+ *
+ * Kept, and kept small. This is the one screen that has nothing to do with the
+ * intelligence layer, and that is fine - a dropped frame still loses a round.
+ * It sits under Compete rather than in its own module because it is something
+ * you do ten minutes before a game, not something you study.
+ */
 import { Button } from '../components/ui'
 import { Check, Warn } from '../components/icons'
 import { GAMES_BY_ID, genreOf } from '../data/games'
@@ -10,7 +18,7 @@ import { diagnosticsFor, networkMetricsFor } from '../data/checks'
 import { player } from '../data/mock'
 import { useGame } from '../gameContext'
 
-export default function Diagnostics() {
+export default function SetupCheck() {
   const { game } = useGame()
   const active = game ?? GAMES_BY_ID[player.primaryGameId]
   const checks = useMemo(() => diagnosticsFor(active.platform), [active.platform])
@@ -24,7 +32,7 @@ export default function Diagnostics() {
     <div className="space-y-10">
       <HudPageHeader
         eyebrow={`${active.platform} · ${genreOf(active).label}`}
-        title="Diagnostics"
+        title="Setup check"
         subtitle={`Checks tuned for ${active.name}. Last run ${ranAt}.`}
         action={
           <Button variant="primary" onClick={() => setRanAt('just now')}>
@@ -105,7 +113,7 @@ export default function Diagnostics() {
       <section>
         <HudSection
           eyebrow="Pre-match"
-          title={`${active.platform} readiness`}
+          title={`${active.platform} checks`}
           action={
             <span className="text-body-s text-ink-muted">
               {active.platform === 'Mobile'

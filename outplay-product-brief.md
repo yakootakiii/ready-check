@@ -1,338 +1,377 @@
-# Ready Check — Frontend Mockup Spec
+# OUTPLAY
 
-A build brief for a frontend mockup of a freemium, game-agnostic esports
-development platform. Feed this file to Claude Code and ask it to scaffold
-the mockup (suggested stack at the bottom).
+**Know your game. Know your opponent. Outplay.**
 
-Working name: **Ready Check** — borrowed from the raid-prep callout gamers
-already know. The whole platform is about confirming you're actually ready
-before it counts, so the name should show up as a literal UI element (the
-pre-match readiness screen), not just a logo.
+*Competitive Intelligence for Esports*
 
----
+> Outplay learns how players and teams compete, analyses how their styles
+> interact, and turns competitive data into the intelligence needed to gain an
+> edge.
 
-## 1. What we're designing
-
-Four connected surfaces for one player-facing product:
-
-1. **Prep** — scrim finder, VOD review, wellness/readiness tracking
-2. **Compete** — brackets, live match tools, diagnostics
-3. **Recruit** — player profile/portfolio, org search and matching
-4. **Profile** — the public player card that ties it all together
-
-Audience: competitive players from amateur to semi-pro, across any game
-title, mostly viewing on a second monitor or phone between matches. They
-already live inside HUDs, scoreboards, and rank badges — the UI should feel
-like it belongs in that world, not like a generic SaaS dashboard wearing a
-dark theme.
+This document is the product reference for the mockup in this repository. It
+replaces the Ready Check frontend spec, which described a different product:
+a readiness-and-tournament hub built around the loop *prepare → compete →
+prove*. Where this file and the code disagree, `CLAUDE.md` is the tiebreaker —
+it records what the build actually does.
 
 ---
 
-## 2. Design principles
+## 1. What Outplay is
 
-- **Broadcast HUD, not cyberpunk.** Reference esports tournament overlays
-  and scoreboards — angular clipped panels, dense stat readouts, rank-tier
-  color coding — rather than generic neon-on-black. No single acid-green
-  accent glowing on pure black; that reads as a template, not a competitor's
-  tool.
-- **Color carries information.** The accent system doubles as the rank-tier
-  system used throughout the product (see below). Color isn't decoration —
-  a badge's color tells you someone's tier before you read the label.
-- **One bold gesture per screen.** The live-match banner or rank badge gets
-  the angular cut treatment. Everything around it (tables, forms, settings)
-  stays calm, rectangular, and easy to scan — competitive players are
-  reading this mid-session, not admiring it.
-- **Numbers get a different typeface than words.** Stats, timers, and
-  scores render in monospace, like a scoreboard readout. Everything else is
-  humanist and easy to read at a glance.
-- **Respect the quiet moments too.** Settings, forms, and empty states
-  don't need HUD treatment — over-styling every screen is how mockups start
-  looking like a demo reel instead of a tool people use for hours a day.
+Outplay is an AI-powered competitive intelligence platform for esports players
+and teams. It is not an aggregator. Tournaments, ladders, scrims and profiles
+are all present, but they are the substrate, not the product.
+
+The product is the answer to one question:
+
+> **What can we learn from how you compete?**
+
+And the value proposition is the use of that answer:
+
+> Outplay transforms competitive data into an understanding of how players and
+> teams play — and uses that understanding to identify the edge in future
+> matchups.
+
+It sits at the intersection of six things, and should feel like all of them at
+once: esports analytics, competitive intelligence, player development, matchup
+analysis, talent discovery, and competitive networking.
+
+**On the AI.** The intelligence is behavioural modelling — embeddings,
+clustering, temporal models, matchup analysis. Language models sit at the *end*
+of that stack as an explanation layer. Nothing in the UI presents a chat box as
+the source of insight, and no screen has an "AI coach" persona. The system is
+the intelligence; the words are how it reports.
+
+### What was removed
+
+The following were load-bearing in Ready Check and are deliberately gone:
+
+- the Ready Check name and the readiness callout as the product's centre
+- readiness score as the primary metric (it survives as a secondary signal that
+  *explains variance*, on one quiet screen)
+- the *Prepare → Compete → Prove* loop
+- a general-purpose AI coach
+- tournament aggregation as the reason to open the app
+- profiles that lead with rank
 
 ---
 
-## 3. Design tokens
+## 2. The core loop
 
-### Color
+    PLAY  →  ANALYZE  →  UNDERSTAND  →  ADAPT  →  OUTPLAY
 
-| Token | Hex | Use |
-|---|---|---|
-| `bg-base` | `#10121A` | App background — deep graphite with a blue undertone, not pure black |
-| `bg-surface` | `#191C29` | Cards, panels |
-| `bg-raised` | `#222639` | Modals, dropdowns, hover states |
-| `border` | `#2E3244` | Hairlines, dividers |
-| `text-primary` | `#EDEFF5` | Body text, headings — off-white, not pure white |
-| `text-muted` | `#8B90A3` | Secondary text, timestamps, labels |
-| `signal` | `#4CE0D2` | Primary accent — live indicators, primary actions, focus states |
-| `ember` | `#FF6B3D` | Secondary accent — alerts, streaks, rank-up moments. Used sparingly |
+Every match generates data. That data updates the system's understanding of the
+player and the team. The system builds a model of how they compete. That model
+is used to analyse future opponents and matchups. After the match, the actual
+result is compared against the prediction, and the intelligence improves.
 
-**Rank-tier ramp** (used on badges, leaderboards, profile borders —
-consistent across every module so a tier is recognizable at a glance):
+The navigation is this loop. Analyze comes before Matchup, which comes before
+Compete, because that is the order the value arrives in.
 
-| Tier | Hex |
+---
+
+## 3. Competitive DNA
+
+An AI-generated representation of **how** a competitor plays. It is a profile,
+never a score, and no screen may reduce it to one number.
+
+**Player dimensions (12):** aggression, consistency, adaptability, pressure
+performance, risk-taking, team contribution, decision-making, objective focus,
+mechanical performance, tempo, role range, strategic tendency.
+
+**Team dimensions (12):** aggression, coordination, preferred tempo, adaptation,
+early game, late game, objective priority, drafting, closing, discipline, under
+pressure, role reliance.
+
+Six of each are marked `core` and carry the compact form — a card, a list row, a
+comparison strip. The full twelve are for screens with room to read them.
+
+Two properties matter more than the list:
+
+- **Role reliance runs backwards.** It is the one dimension where high is a
+  liability. Anything that ranks, colours or compares dimensions has to know
+  that, or a team's biggest fragility gets reported as a strength.
+- **The profile is derived, not decorated.** A player's DNA follows from their
+  rating, their role and their genre; a team's from its record and its form. Two
+  screens showing the same competitor show the same shape.
+
+### Competitive identity
+
+The line a recruiter reads instead of a rank. It is *composed* from the shape —
+the top dimension supplies the noun, the second the adjective — so twelve
+dimensions generate a vocabulary that stays specific:
+
+    Adaptive Aggressor
+    High-pressure performer
+    Strong mid-game decision-making
+    Flexible role pool
+
+Not:
+
+    Rank: Immortal
+
+### Visualisation
+
+A radar is the primary form, because the thing being read is the silhouette —
+spiky or round, front-loaded or back-loaded — and two overlaid outlines can be
+compared at a glance. It never appears alone: a radar cannot be read to a
+precise value, so the numbered dimension list is always beside it, and that list
+is what carries the profile to a screen reader.
+
+Two series maximum. Three outlines on one polar grid stop being a comparison.
+
+---
+
+## 4. Matchup Intelligence — the flagship
+
+Everywhere else asks "how good is this team". Outplay asks:
+
+> **How does your style interact with theirs?**
+
+For an upcoming match the system reads both Competitive DNA profiles and
+produces: the opponent's strongest tendencies, their exploitable ones, expected
+tempo, likely win conditions, the style clash, favourable and unfavourable
+dimensions, and the areas to prepare.
+
+The output is written the way a coach would say it:
+
+> **Matchup Insight**
+>
+> Your team performs significantly better against slower, objective-focused
+> teams but struggles against early aggression.
+>
+> The opponent shows a high early-pressure tendency.
+>
+> **Primary concern:** Early-game tempo.
+>
+> **Potential edge:** Your team has stronger late-game consistency.
+
+Rules the screen holds to:
+
+- **A gap under six points is shown as even.** That is inside the model's own
+  noise, and putting a recommendation on a rounding error is how an analytics
+  product loses a coach.
+- **The win projection is small and carries its band.** A matchup screen whose
+  largest element is a win percentage has quietly become a betting site.
+  Confidence widens the band rather than moving the number.
+- **Blue is you, orange is them, green is an advantage** — on every surface, so
+  a comparison reads before a word of it does.
+
+---
+
+## 5. Post-match intelligence
+
+After a match Outplay compares what the model expected against what actually
+happened, and reports the gap:
+
+| | |
 |---|---|
-| Bronze | `#B5793E` |
-| Silver | `#A9AFC0` |
-| Gold | `#E4B94E` |
-| Platinum | `#4FC3B0` |
-| Diamond | `#8C7BE0` |
+| **Prediction** | Opponent expected to apply heavy early pressure. |
+| **Reality** | Opponent played defensively for the first 10 minutes and shifted aggression after gaining an objective advantage. |
+| **New insight** | Opponent's aggression is conditional on objective control. |
 
-### Typography
+Each observation is graded `confirmed`, `shifted` or `surprise`. Only `surprise`
+teaches the model much, and a `shifted` read scores as half a hit — scoring it
+as a full one would let the system report a perfect week in which it mis-sized
+every call it made.
 
-Three roles, three typefaces — each doing a distinct job rather than one
-family stretched thin:
-
-- **Display** — `Rajdhani` (600/700). Headlines, page titles, the readiness
-  score, rank names. Condensed and angular, the way broadcast title cards
-  set player names.
-- **Body** — `Inter` (400/500). Everything you read continuously:
-  descriptions, settings, form labels, table cells. Optimized for
-  legibility, not personality.
-- **Data / mono** — `JetBrains Mono` (400/500). Stats, timers, K/D
-  ratios, countdowns, ping numbers. Tabular figures so columns of numbers
-  align.
-
-Type scale (display / body):
-
-```
-Display XL   40px / 44px   — hero readouts (readiness score, countdown)
-Display L    28px / 32px   — page titles
-Display M    20px / 24px   — section headers, card titles
-Body L       16px / 26px   — primary reading text
-Body M       14px / 22px   — default UI text
-Body S       12px / 18px   — labels, captions, timestamps
-Mono M       14px / 20px   — inline stats
-Mono L       22px / 26px   — featured stats (countdown, score)
-```
-
-Sentence case throughout — no tracked-out all-caps eyebrow labels, no
-middle-dot separators in metadata strings. Keep button copy in active
-voice describing exactly what happens: "Join scrim," not "Submit."
-
-### Shape & spacing
-
-- Base radius: `6px` on cards, inputs, buttons — enough to feel modern
-  without going pill-shaped.
-- **Angular cut** (the one bold structural device): a clipped corner on
-  hero elements only — the live-match banner, rank badge frame, and the
-  primary CTA on the readiness screen. `clip-path: polygon(0 0, 100% 0,
-  100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%)`. Nowhere else —
-  regular cards stay rectangular so the cut still reads as a signal, not a
-  theme applied everywhere.
-- Spacing scale: `4 / 8 / 12 / 16 / 24 / 32 / 48px`.
-- Borders: 1px hairlines in `border`, not shadows — shadows read as
-  generic SaaS-card default at this density.
+Discoveries are always **conditional** ("their aggression is conditional on X"),
+because that is what one match actually reveals. A single result moves a
+dimension by a point or two; anything larger is fitting noise.
 
 ---
 
-## 4. App shell
+## 6. Outplay Competitive Passport
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ READY CHECK    Overview  Prep  Compete  Recruit         🔔  [PFP] │
-├───────────┬────────────────────────────────────────────────────────┤
-│ ▎Overview │                                                        │
-│  Scrims   │              main content area                        │
-│  VOD      │                                                        │
-│  Wellness │                                                        │
-│ ───────── │                                                        │
-│  Brackets │                                                        │
-│  Live     │                                                        │
-│  Diag.    │                                                        │
-│ ───────── │                                                        │
-│  My card  │                                                        │
-│  Org      │                                                        │
-│   search  │                                                        │
-└───────────┴────────────────────────────────────────────────────────┘
-```
+A persistent competitive identity that travels with a player: Competitive DNA,
+match history, performance trends, roles, tournament history, team history,
+strengths, weaknesses, notable performances, improvement trajectory, and
+verified achievements.
 
-Left rail is icon + label, collapsible to icons-only. Active section gets
-a `signal`-colored left border on its row, not a filled background — keeps
-the rail quiet. Top bar stays fixed; it's the one place a live-match state
-persists no matter which module you're in (a slim "LIVE — Map 2, 14:32"
-strip appears here during a match, tapping it jumps to Compete).
+Identity and DNA lead. Rank, rating and win rate are supporting evidence further
+down the card. The passport looks the same to the player and to an org — one
+that changed depending on who was reading it would not be a passport.
+
+"Verified" means the result was checked against a recorded outcome, and
+self-reported entries say so.
 
 ---
 
-## 5. Page mockups
+## 7. Talent Intelligence
 
-### 5.1 Overview (home)
+Recruitment posed as compatibility rather than ranking.
 
-```
-┌─────────────────────────────────────────────┐
-│  Good evening, Kade                          │
-│                                               │
-│  ┌───────────────────┐  ┌──────────────────┐ │
-│  │ READINESS          │  │ NEXT MATCH        │ │
-│  │                     │  │ (angular banner)  │ │
-│  │    82               │  │ Rival Esports     │ │
-│  │  ▁▂▃▅▇ trending up  │  │ Tomorrow, 7:00 PM │ │
-│  │  Sleep ok · Load high│  │ [Ready Check →]  │ │
-│  └───────────────────┘  └──────────────────┘ │
-│                                               │
-│  Scrim invites (3)          Recent VOD notes  │
-│  ┌─────────────────┐        ┌───────────────┐ │
-│  │ Team Vortex      │        │ Map 2 — rotate│ │
-│  │ Gold · 8pm       │        │ timing, 3 tags│ │
-│  │ [Accept] [Pass]  │        └───────────────┘ │
-│  └─────────────────┘                          │
-└─────────────────────────────────────────────┘
-```
+Instead of *find players with high rank*, an organisation asks *find players who
+complement our Competitive DNA*. The system reads a roster's own profile, names
+what it is missing, and ranks candidates by whether they close it:
 
-The **readiness score** is the hero element — one number, built from sleep,
-practice load, and recent match stress, with a one-line plain-language
-reason under it ("Sleep ok, load high" rather than a jargon breakdown).
-This is the "big number" treatment the brief actually earns, since
-readiness is the single thing a player wants to know before deciding how
-hard to push today.
+**Roster fit** — this team needs stronger objective control, a flexible support,
+and a consistent late-game player.
 
-### 5.2 Prep → Scrim finder
+A Gold-tier support who fills the exact gap outranks a Diamond duelist who
+duplicates the strongest seat. Every score shows the reasons underneath it: a
+compatibility number nobody can interrogate is a rank with extra steps.
 
-```
-┌─────────────────────────────────────────────┐
-│  Find a scrim                [Filters ▾]     │
-│  Game: Valorant   Rank: Gold–Plat   Region: NA│
-│                                               │
-│  ┌─────────────────────────────────────────┐ │
-│  │ ● Team Vortex          Gold      NA-East │ │
-│  │   Open 8:00–10:00 PM   Bo3               │ │
-│  │                          [Request scrim] │ │
-│  ├─────────────────────────────────────────┤ │
-│  │ ● Nine Lives            Plat     NA-West │ │
-│  │   Open now              Bo1               │
-│  │                          [Request scrim] │ │
-│  └─────────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘
-```
+The same model runs in reverse for players looking for a roster.
 
-Rank shown as a colored dot + label using the tier ramp — scannable
-without reading. List rows, not cards-in-a-grid: this is a dense
-scheduling task, not a browsing task.
-
-### 5.3 Prep → VOD review
-
-```
-┌─────────────────────────────────────────────┐
-│  [ video player ]                 12:45/28:10│
-│  ├──●───────────────────────────────────────┤│
-│     ▲tag        ▲tag  ▲tag                    │
-│                                               │
-│  Tags on this VOD                             │
-│  06:12  Rotation late — B site               │
-│  14:03  Good trade, follow up slow            │
-│  22:40  Econ mismanagement                    │
-│                          [+ Add tag at 12:45] │
-└─────────────────────────────────────────────┘
-```
-
-Timeline tags are the core interaction — click a tag, jump to that
-timestamp. Keep the player itself unstyled/native-feeling; the value is in
-the tagging layer, not a custom video chrome.
-
-### 5.4 Compete → Live match / diagnostics
-
-```
-┌─────────────────────────────────────────────┐
-│  ⬡ LIVE — Map 2                    14:32     │
-│  vs. Rival Esports          13 — 11 (mono)   │
-│                                               │
-│  Pre-match check                             │
-│  ✓ Ping: 24ms         ✓ Peripherals detected │
-│  ✓ Mic check passed   ⚠ Frame rate unstable  │
-│                                               │
-│  [ View bracket ]        [ Open comms ]      │
-└─────────────────────────────────────────────┘
-```
-
-This is the other angular-cut moment — the live banner. Diagnostics use
-plain check/warning icons, not colored pills for every row; a warning
-should visually interrupt the otherwise-calm checklist.
-
-### 5.5 Recruit → Org search / player card
-
-```
-┌─────────────────────────────────────────────┐
-│  ┌───────────────┐   Kade "Vantage" Ruiz     │
-│  │  (angular      │   Duelist · Valorant     │
-│  │   player photo │   ◆ Diamond               │
-│  │   frame, tier-  │                          │
-│  │   colored edge)│   Win rate  58%           │
-│  └───────────────┘   Scrims logged  142       │
-│                       Availability  Evenings ET│
-│                                               │
-│  Highlight VODs (3)      [Message]  [Invite] │
-└─────────────────────────────────────────────┘
-```
-
-The player card is the recruitment unit — think "LinkedIn profile" crossed
-with a trading card, but restrained: one tier-colored frame edge, stats in
-mono, no badges-on-badges clutter. This card is also literally the public
-Profile page, just without the org-facing actions.
+Concepts covered: player–team compatibility, roster gap analysis, role fit,
+playstyle fit, complementary DNA, emerging talent, development trajectory.
 
 ---
 
-## 6. Core components
+## 8. Competitive Network
 
-| Component | Notes |
+The ecosystem, kept but subordinated to the intelligence layer:
+
+    Players → Teams → Schools → Organizations → Matches → Tournaments → Games
+
+Schools remain first-class entities. The platform launches into a scene where
+the university programme is often the entire pipeline, and filing schools under
+a generic "orgs" list would misrepresent how Philippine esports works.
+
+It is not a social network. There is no feed, no follower count and no posting.
+
+---
+
+## 9. Philippine focus
+
+Regions are PH regions (NCR, CALABARZON, Cebu, Davao, Iloilo, Pampanga, Bicol,
+Baguio, Bacolod, Cagayan de Oro, Zamboanga, Central Luzon, Laguna, Cavite),
+venues are PH cities, prize pools are in pesos, and team names, player handles,
+schools and organisations are Filipino. A stray "NA-East" or a dollar sign is a
+bug.
+
+The interface should read as a modern global esports technology platform that
+happens to launch in the Philippines — not as a localised or government product.
+
+Every institution, roster, record and championship is **invented**. Only the
+game titles and their logos are real.
+
+---
+
+## 10. Games, and honest coverage
+
+The architecture is modular and multi-title — 25 games across PC, mobile and
+console, each carrying its own roles, stat vocabulary, unit of play, team size
+and regions. Nothing hardcodes a title.
+
+But the MVP models **one game properly** rather than claiming twenty-five, and
+the product says so. `INTEL_COVERAGE` grades every title:
+
+- **Full** — Competitive DNA, matchup intelligence and post-match learning are
+  live. Valorant.
+- **Calibrating** — the model is still settling; confidence is shown as
+  provisional. MLBB, CS2, Dota 2, League of Legends.
+- **Ecosystem only** — ladders, teams, tournaments and scrims are covered;
+  behavioural modelling is not live yet. Everything else.
+
+Coverage is stated on every intelligence surface. A platform that showed the
+same confident profile for all twenty-five would be lying about the thing it is
+selling.
+
+Genre supplies the vocabulary an insight uses, so "objective control" means
+towers in a MOBA, site control in a tactical shooter and zone timing in a battle
+royale — seven lexicon entries covering twenty-five titles.
+
+---
+
+## 11. Navigation
+
+| Module | Screens |
 |---|---|
-| Rank badge | Tier ramp color, angular frame, used on profile, leaderboard, scrim rows |
-| Readiness meter | Single big mono number + sparkline + one-line reason |
-| Live match banner | Angular cut, `signal` accent, persists in top bar during a match |
-| Scrim row | List item, not a card — rank dot, time window, one primary action |
-| VOD timeline tag | Small marker on scrubber, click-to-seek, hover shows note |
-| Diagnostic checklist | Check/warn/fail icons, no colored pill overuse |
-| Player card | Tier-framed photo, mono stats block, used in both Recruit and Profile |
+| **Home** | Competitive overview, next match, recent insights, performance trends |
+| **Analyze** | Competitive DNA · Match analysis · Performance · VOD intel · Condition |
+| **Matchup** | Next match · Opponents |
+| **Compete** | Match centre · Tournaments · Scrims · Setup check |
+| **Network** | Players · Teams · Schools · Organizations · Talent |
+| **Passport** | The player's own competitive profile |
 
 ---
 
-## 7. Motion
+## 12. Homepage
 
-One orchestrated moment, not hover effects everywhere:
+Hero: the wordmark, the tagline, the supporting statement, **Analyse my game**
+as the primary call to action and **Explore competition** as the secondary — and
+beside it a radar carrying the reader's own shape against their next opponent's,
+because that image is the thesis.
 
-- When a match goes live, the top-bar strip slides in once and the live
-  banner's border pulses subtly for a few seconds, then settles — it
-  should register the state change without staying distracting for the
-  next two hours of play.
-- Readiness score animates a brief count-up on load, once per session.
-- Everything else (buttons, list rows, tabs) gets a fast, simple state
-  change — no slide-up entrances, no staggered card reveals. Respect
-  `prefers-reduced-motion`.
+Below it, in order: Your Competitive DNA · Next Match · Your Edge · Watch Out ·
+Recent insights · Performance evolution · the ecosystem · how the intelligence
+is built.
 
----
-
-## 8. Accessibility & responsive notes
-
-- Text/background contrast meets WCAG AA at every token pairing above
-  (verify `text-muted` on `bg-surface` specifically — it's the tightest
-  pairing).
-- Visible keyboard focus ring in `signal`, 2px, offset — never remove
-  outline without replacing it.
-- Rank tiers are conveyed by color **and** label text, never color alone.
-- Mobile: sidebar collapses to a bottom tab bar (Overview / Prep / Compete
-  / Recruit); the live-match strip becomes a persistent top pill instead
-  of a full banner.
+Ecosystem content sits *below* the intelligence. An aggregator is the thing this
+product is deliberately not.
 
 ---
 
-## 9. Suggested build stack for Claude Code
+## 13. AI architecture
 
-Ask Claude Code to scaffold this as:
+    Data layer
+      match data · player statistics · team statistics · VODs ·
+      tournament history · competitive passports
+                              ↓
+    Feature engineering
+      behavioural features · temporal patterns · performance features ·
+      team interaction features
+                              ↓
+    Competitive intelligence engine
+      player embeddings · team embeddings · style clustering ·
+      temporal modelling · matchup analysis · prediction · anomaly detection
+                              ↓
+    Competitive DNA
+                              ↓
+    Matchup Intelligence
+                              ↓
+    Actionable insights
 
-- **React + Vite + Tailwind CSS**, with the tokens above set up as
-  Tailwind theme extensions (colors, fontFamily, borderRadius) rather than
-  hardcoded classes.
-- Load `Rajdhani`, `Inter`, and `JetBrains Mono` from Google Fonts.
-- Build the app shell first (sidebar + top bar + routing between the four
-  modules), then the Overview page, then one representative screen per
-  module from section 5 — static/mock data is fine, this is a look-and-feel
-  mockup, not a working backend.
-- Keep the angular clip-path treatment isolated to a single reusable
-  `<AngularPanel>` component so it stays a deliberate accent instead of
-  spreading everywhere.
+Drawn on the homepage with the weight in the middle: inputs quiet, the engine
+heavy, outputs at the bottom as the result of everything above them. A version
+of this diagram with a chat box at the top would be describing a different,
+weaker product.
 
-Prompt starter for Claude Code:
+---
 
-> Build a React + Tailwind mockup of the app shell and the five pages
-> described in this spec (`ready-check-frontend-mockup-spec.md`). Use mock
-> data. Prioritize the design tokens and the Overview page first, then the
-> remaining four screens.
+## 14. Visual direction
+
+Modern, competitive, intelligent, technical, premium, esports-native, slightly
+futuristic. **Professional esports analytics + modern AI platform + competitive
+dashboard** — not arcade neon.
+
+Credible to a player, a coach, a university programme, a recruiter and a
+tournament operator at the same time.
+
+### Colour is meaning
+
+| Token | Means |
+|---|---|
+| `signal` `#6C8CFF` | you, your side, the intelligence layer |
+| `ember` `#FF6B4A` | the opponent, anything live, anything being warned about |
+| `edge` `#35D6A4` | an advantage: a favourable dimension, a positive delta, a win |
+
+The rank-tier ramp (bronze → diamond) survives as one shared system, but rank is
+a secondary readout now. Every token pairing meets WCAG AA.
+
+### Type
+
+Three typefaces, three jobs. **Space Grotesk** for display — technical rather
+than arcade, which is what makes the product readable as analytics. **Inter**
+for anything read continuously. **JetBrains Mono**, tabular figures, for every
+stat, timer, score and dimension value. Numbers in a body font are a bug.
+
+### Structure
+
+Hairline borders, not shadows. The angular clip-path stays a rationed hero
+device. All-caps is confined to HUD labels and the home hero. Sentence case
+everywhere else, and button copy names the action.
+
+---
+
+## 15. The principle to hold
+
+Do not let Outplay drift back into being another esports platform that
+aggregates tournaments, profiles and statistics. Every screen should be
+answerable to the same question:
+
+> **What can we learn from how you compete?**
+
+If a panel cannot answer it, it belongs below the ones that can.

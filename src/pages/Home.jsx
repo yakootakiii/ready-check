@@ -1,495 +1,368 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AngularPanel from '../components/AngularPanel'
 import GameTile from '../components/GameTile'
 import Reveal from '../components/Reveal'
+import DnaRadar, { RadarLegend } from '../components/DnaRadar'
+import { DnaStrip } from '../components/DnaDimensions'
+import InsightCard from '../components/InsightCard'
+import IntelligencePipeline from '../components/IntelligencePipeline'
+import CoverageNote from '../components/CoverageNote'
+import { MatchupMeter } from '../components/MatchupBars'
+import Sparkline from '../components/Sparkline'
 import {
   AnimatedNumber,
   Countdown,
+  FormRow,
   HudLabel,
   HudPanel,
+  HudSection,
   LivePip,
-  StatBar,
   Ticker,
 } from '../components/hud'
 import { Button } from '../components/ui'
-import { ArrowRight, Broadcast, Calendar, Play, Search } from '../components/icons'
-import { useCarousel, useTickingClock } from '../hooks'
-import { formatClock } from '../format'
-import { tier as tierOf } from '../tiers'
+import { ArrowRight, Broadcast, Dna, Radar, Target, Trend } from '../components/icons'
 import { useGame } from '../gameContext'
-import { GAMES, GAMES_BY_ID, genreOf } from '../data/games'
-import {
-  acrossGames,
-  activityFor,
-  eventsFor,
-  liveMatchesFor,
-  newsFor,
-  openScrimsFor,
-  playersFor,
-  teamsFor,
-} from '../data/generate'
-
-const STATUS = {
-  live: { label: 'Live', className: 'border-ember/60 text-ember' },
-  open: { label: 'Registration open', className: 'border-signal/60 text-signal' },
-  soon: { label: 'Announced', className: 'border-line text-ink-muted' },
-}
-
-/** Every list on this page comes from one title or from all of them. */
-function useHubData(gameId, isAll) {
-  return useMemo(() => {
-    const take = (generator, limit, sortBy) =>
-      isAll ? acrossGames(generator, { limit, sortBy }) : generator(gameId).slice(0, limit)
-
-    return {
-      live: take(liveMatchesFor, 3, (a, b) => b.viewers - a.viewers),
-      scrims: take(openScrimsFor, 4, (a, b) => a.slots - b.slots),
-      events: take(eventsFor, 4, (a, b) => b.prizeValue - a.prizeValue),
-      players: take(playersFor, 5, (a, b) => b.rating - a.rating),
-      teams: take(teamsFor, 5, (a, b) => b.streak - a.streak),
-      news: take(newsFor, 4),
-    }
-  }, [gameId, isAll])
-}
-
-function gameOf(row) {
-  return GAMES_BY_ID[row.gameId]
-}
-
-function SectionHeading({ eyebrow, title, action }) {
-  return (
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <HudLabel className="text-signal">{eyebrow}</HudLabel>
-        <h2 className="mt-1 font-display text-display-l font-bold tracking-tight text-ink">
-          {title}
-        </h2>
-      </div>
-      {action}
-    </div>
-  )
-}
-
-/** Marks which title a row belongs to. Essential in the "All games" view. */
-function GameStamp({ game, className = '' }) {
-  return (
-    <span className={`flex min-w-0 items-center gap-2 ${className}`}>
-      <GameTile game={game} size="s" />
-      <span className="truncate text-body-s text-ink-muted">{game.short}</span>
-    </span>
-  )
-}
-
-function LiveMatchCard({ match, delay }) {
-  const seconds = useTickingClock(match.clock)
-  const game = gameOf(match)
-  const t = tierOf(match.tier)
-
-  return (
-    <Reveal delay={delay}>
-      <HudPanel interactive glow="ember" className="scanlines h-full overflow-hidden p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-2 text-ember">
-            <LivePip />
-            <span className="hud-label truncate text-ember">Live · {match.kind}</span>
-          </span>
-          <span className="font-mono text-mono-m text-ink-muted">{formatClock(seconds)}</span>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <div className="truncate font-display text-display-m font-semibold text-ink">
-              {match.sides[0]}
-            </div>
-            <div className="truncate font-display text-display-m font-semibold text-ink-muted">
-              {match.sides[1]}
-            </div>
-          </div>
-          <div className="text-right font-mono text-mono-l text-ink">
-            <div>{match.score[0]}</div>
-            <div className="text-ink-muted">{match.score[1]}</div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-3">
-          <GameStamp game={game} />
-          <span className="shrink-0 text-body-s text-ink-muted">{match.unitLabel}</span>
-          <span className={`shrink-0 text-body-s ${t.text}`}>{t.label}</span>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between">
-          <span className="font-mono text-mono-m text-ink-muted">
-            {(match.viewers / 1000).toFixed(1)}k watching
-          </span>
-          <Button variant="ghost" className="px-2 py-1">
-            <Play />
-            Watch
-          </Button>
-        </div>
-      </HudPanel>
-    </Reveal>
-  )
-}
-
-function BrowseGames({ onPick, activeId }) {
-  return (
-    <section>
-      <SectionHeading
-        eyebrow={`${GAMES.length} titles`}
-        title="Browse by game"
-        action={<span className="text-body-s text-ink-muted">PC · Mobile · Console</span>}
-      />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {GAMES.map((game, i) => {
-          const genre = genreOf(game)
-          const activity = activityFor(game.id)
-          const active = game.id === activeId
-          return (
-            <Reveal key={game.id} delay={Math.min(i, 12) * 40}>
-              <HudPanel
-                as="button"
-                interactive
-                corners={false}
-                onClick={() => onPick(game.id)}
-                className={`flex w-full items-center gap-3 p-3 text-left ${
-                  active ? 'border-signal/70' : ''
-                }`}
-              >
-                <GameTile game={game} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-body-m text-ink">{game.name}</span>
-                  <span className={`block truncate text-body-s ${genre.text}`}>
-                    {genre.label} · {game.platform} · {game.regions[0]}
-                  </span>
-                </span>
-                <span className="shrink-0 text-right">
-                  <span className="flex items-center justify-end gap-1.5 font-mono text-body-s text-ember">
-                    <LivePip />
-                    {activity.live}
-                  </span>
-                  <span className="block font-mono text-body-s text-ink-muted">
-                    {activity.scrims}
-                  </span>
-                </span>
-              </HudPanel>
-            </Reveal>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-
-const HERO_DWELL_MS = 7000
+import { GAMES_BY_ID, genreOf } from '../data/games'
+import { coreDimensionsFor } from '../data/dna'
+import { acrossGames, activityFor, liveMatchesFor } from '../data/generate'
+import { modelAccuracyFor, myDna, nextFixture } from '../data/matchup'
+import { insightFeedFor } from '../data/intel'
+import { player } from '../data/mock'
+import { tier as tierOf } from '../tiers'
 
 /**
- * The featured-event hero. With more than one slide it rotates on a timer and
- * exposes the rotation as a row of title tabs - which doubles as a readout of
- * the five busiest scenes, and gives the reader a way to stop and steer it.
+ * The landing surface, and the product's whole argument in one scroll.
+ *
+ * Order is the message. The hero states what Outplay is; then the four panels
+ * a competitor actually opens the app for - who you are, who is next, where
+ * you are ahead, what you have to survive; then what the system has learned
+ * lately; then, at the bottom, how it works. Ecosystem content (live matches,
+ * the circuit) sits below the intelligence rather than above it, because an
+ * aggregator is the thing this product is deliberately not.
+ *
+ * Intelligence is per-title, so an "all titles" selection resolves to the
+ * player's primary game rather than averaging twenty-five scenes into
+ * something meaningless.
  */
-function FeaturedHero({ slides }) {
-  const navigate = useNavigate()
-  const [paused, setPaused] = useState(false)
-  const { index, setIndex } = useCarousel(slides.length, {
-    interval: HERO_DWELL_MS,
-    paused,
-  })
-
-  const event = slides[index]
-  const game = GAMES_BY_ID[event.gameId]
-  const rotating = slides.length > 1
-
-  return (
-    <Reveal
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <AngularPanel
-        accent="signal"
-        fill="bg-surface/85"
-        innerClassName="sheen-run scanlines relative overflow-hidden p-6 md:p-10"
-      >
-        {/* Keyed on the slide so the swap animation replays each rotation. */}
-        <div key={event.id} className="animate-hero-swap">
-          <div className="flex flex-wrap items-start justify-between gap-8">
-            <div className="max-w-2xl">
-              <span className="flex flex-wrap items-center gap-3">
-                <GameTile game={game} size="s" />
-                <HudLabel className="text-ember">Featured event · {game.name}</HudLabel>
-              </span>
-
-              <h1 className="mt-3 font-display text-[clamp(2.25rem,5.5vw,4rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
-                {event.name}
-              </h1>
-              <p className="mt-2 text-body-l text-ink-muted">
-                {event.window} · {event.venue} · {genreOf(game).label}
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-8">
-                <div>
-                  <HudLabel>Prize pool</HudLabel>
-                  <div className="mt-1 font-mono text-mono-l text-signal">{event.prize}</div>
-                </div>
-                <div>
-                  <HudLabel>Teams</HudLabel>
-                  <div className="mt-1 font-mono text-mono-l text-ink">
-                    <AnimatedNumber value={event.teams} />
-                  </div>
-                </div>
-                <div>
-                  <HudLabel>Format</HudLabel>
-                  <div className="mt-1 font-mono text-mono-l text-ink">
-                    {game.teamSize === 1 ? 'Solo' : `${game.teamSize}v${game.teamSize}`}
-                  </div>
-                </div>
-                <div>
-                  <HudLabel>Region</HudLabel>
-                  <div className="mt-1 font-mono text-mono-l text-ink">{event.region}</div>
-                </div>
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="primary" onClick={() => navigate('/compete/live')}>
-                  <Broadcast />
-                  Watch the final
-                </Button>
-                <Button onClick={() => navigate('/compete/brackets')}>
-                  View bracket
-                  <ArrowRight />
-                </Button>
-              </div>
-            </div>
-
-            <div className="shrink-0">
-              <HudLabel className="mb-2">Starts in</HudLabel>
-              <Countdown key={event.id} seconds={event.startsInSeconds} />
-            </div>
-          </div>
-        </div>
-
-        {rotating && (
-          <div className="mt-8 border-t border-line pt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <HudLabel>Busiest scenes</HudLabel>
-              <span className="text-body-s text-ink-muted">
-                {paused ? 'Paused' : `${index + 1} of ${slides.length}`}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {slides.map((slide, i) => {
-                const g = GAMES_BY_ID[slide.gameId]
-                const active = i === index
-                return (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => setIndex(i)}
-                    aria-current={active ? 'true' : undefined}
-                    title={`${g.name} — ${activityFor(g.id).live} live`}
-                    aria-label={`Show ${g.name}`}
-                    className={`relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-base border px-2 py-2 transition-colors duration-150 sm:justify-start sm:px-3 sm:text-left ${
-                      active
-                        ? 'border-signal/70 bg-raised text-ink'
-                        : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
-                    }`}
-                  >
-                    <GameTile game={g} size="s" />
-                    {/* Below sm there is no room for a legible label, so the
-                        strip becomes a row of monograms rather than five
-                        columns of ellipses. */}
-                    <span className="hidden min-w-0 flex-1 sm:block">
-                      <span className="block truncate text-body-s">{g.short}</span>
-                      <span className="block truncate text-body-s text-ink-muted">
-                        {activityFor(g.id).live} live
-                      </span>
-                    </span>
-                    {/* Dwell indicator; keyed so it restarts with the slide. */}
-                    {active && !paused && (
-                      <span
-                        key={`${slide.id}-dwell`}
-                        aria-hidden="true"
-                        className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-signal"
-                        style={{ animation: `dwell ${HERO_DWELL_MS}ms linear both` }}
-                      />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </AngularPanel>
-    </Reveal>
-  )
-}
-
 export default function Home() {
   const navigate = useNavigate()
-  const { gameId, setGameId, game, isAll } = useGame()
-  const data = useHubData(gameId, isAll)
+  const { game, gameId, isAll } = useGame()
 
-  const maxRating = data.players[0]?.rating ?? 1
+  const active = game ?? GAMES_BY_ID[player.primaryGameId]
+  const mine = myDna(active.id)
+  const fixture = nextFixture(active.id)
+  const matchup = fixture.matchup
+  const insights = insightFeedFor(active.id)
+  const accuracy = modelAccuracyFor(active.id)
+  const core = coreDimensionsFor('team')
 
-  // In all-titles mode the hero rotates through the five busiest scenes, so
-  // the landing surface represents the platform rather than whichever game
-  // happens to sort first. A single selected title has one hero.
-  const featured = useMemo(() => {
-    const pickEvent = (id) => {
-      const list = eventsFor(id)
-      return list.find((e) => e.status === 'live') ?? list[0]
-    }
-    if (!isAll) return [pickEvent(gameId)]
-    return [...GAMES]
-      .sort((a, b) => activityFor(b.id).live - activityFor(a.id).live)
-      .slice(0, 5)
-      .map((g) => pickEvent(g.id))
-  }, [gameId, isAll])
-  const scopeLabel = game ? game.name : 'every title'
+  const series = [
+    { key: 'you', label: `${mine.name} — you`, values: mine.values, tone: 'signal' },
+    { key: 'them', label: `${fixture.opponent.name} — next opponent`, values: matchup.theirs.values, tone: 'ember' },
+  ]
 
-  const ticker = useMemo(() => {
-    const rows = isAll
-      ? acrossGames(liveMatchesFor, { limit: 8, sortBy: (a, b) => b.viewers - a.viewers })
-      : liveMatchesFor(gameId)
-    return rows.map((m) => ({
-      id: m.id,
-      short: GAMES_BY_ID[m.gameId].short,
-      label: `${m.sides[0]} ${m.score[0]} — ${m.score[1]} ${m.sides[1]}`,
-    }))
-  }, [gameId, isAll])
+  const liveNow = useMemo(
+    () =>
+      isAll
+        ? acrossGames(liveMatchesFor, { limit: 3, sortBy: (a, b) => b.viewers - a.viewers })
+        : liveMatchesFor(gameId).slice(0, 3),
+    [gameId, isAll],
+  )
 
-  const platformStats = useMemo(() => {
-    const ids = isAll ? GAMES.map((g) => g.id) : [gameId]
-    const totals = ids.reduce(
-      (acc, id) => {
-        const a = activityFor(id)
-        acc.live += a.live
-        acc.scrims += a.scrims
-        acc.players += a.players
-        return acc
-      },
-      { live: 0, scrims: 0, players: 0 },
-    )
-    const prize = (isAll ? acrossGames(eventsFor) : eventsFor(gameId)).reduce(
-      (sum, e) => sum + e.prizeValue,
-      0,
-    )
-    return [
-      { id: 'live', label: 'Live matches', value: totals.live },
-      { id: 'scrims', label: 'Scrims today', value: totals.scrims },
-      { id: 'players', label: 'Players online', value: totals.players / 1000, decimals: 1, suffix: 'k' },
-      { id: 'titles', label: isAll ? 'Titles covered' : 'Prize pool tracked',
-        value: isAll ? GAMES.length : prize / 1000000, decimals: isAll ? 0 : 1,
-        suffix: isAll ? '' : 'M' },
-    ]
-  }, [gameId, isAll])
+  const ticker = useMemo(
+    () =>
+      insights.map((row) => ({
+        id: row.id,
+        eyebrow: row.eyebrow,
+        text: row.title,
+      })),
+    [insights],
+  )
 
   return (
     <div className="space-y-12">
-      {/* Score ticker ------------------------------------------------------ */}
+      {/* What the model has worked out, on a loop. The old product tickered
+          scores here; scores are the input, and these are the output. */}
       <Ticker className="-mx-4 border-y border-line bg-surface/50 py-2 md:-mx-6">
         {ticker.map((item) => (
           <span key={item.id} className="flex items-center gap-2 px-6">
-            <LivePip />
-            <span className="hud-label text-ink-muted">{item.short}</span>
-            <span className="whitespace-nowrap text-body-m text-ink">{item.label}</span>
+            <span className="hud-label text-signal">{item.eyebrow}</span>
+            <span className="whitespace-nowrap text-body-m text-ink-muted">{item.text}</span>
           </span>
         ))}
       </Ticker>
 
-      {/* Hero -------------------------------------------------------------- */}
-      <FeaturedHero slides={featured} />
+      {/* Hero ------------------------------------------------------------- */}
+      <Reveal>
+        <AngularPanel
+          accent="signal"
+          fill="bg-surface/85"
+          innerClassName="sheen-run scanlines relative overflow-hidden p-6 md:p-10"
+        >
+          <div className="flex flex-wrap items-center gap-10">
+            <div className="min-w-72 max-w-2xl flex-1">
+              <HudLabel className="text-signal">Competitive intelligence for esports</HudLabel>
 
-      {/* Platform stats ---------------------------------------------------- */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {platformStats.map((stat, i) => (
-          <Reveal key={stat.id} delay={i * 70}>
-            <HudPanel interactive className="p-4">
-              <HudLabel>{stat.label}</HudLabel>
-              <div className="mt-2 font-display text-display-xl font-bold text-ink">
-                <AnimatedNumber
-                  value={stat.value}
-                  decimals={stat.decimals ?? 0}
-                  suffix={stat.suffix ?? ''}
-                />
+              <h1 className="mt-3 font-display text-[clamp(3rem,8vw,5.5rem)] font-bold uppercase leading-[0.9] tracking-[-0.02em] text-ink">
+                Outplay
+              </h1>
+              <p className="mt-4 font-display text-[clamp(1.25rem,2.6vw,1.75rem)] font-semibold leading-tight text-ink">
+                Know your game. Know your opponent. Outplay.
+              </p>
+              <p className="mt-4 max-w-xl text-body-l text-ink-muted">
+                Outplay learns how players and teams compete, analyses how their styles
+                interact, and turns competitive data into the intelligence needed to gain an
+                edge.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button variant="primary" onClick={() => navigate('/analyze')}>
+                  <Dna />
+                  Analyse my game
+                </Button>
+                <Button onClick={() => navigate('/network')}>
+                  Explore competition
+                  <ArrowRight />
+                </Button>
               </div>
-            </HudPanel>
-          </Reveal>
-        ))}
+
+              <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-line pt-5">
+                <span className="flex items-center gap-2">
+                  <GameTile game={active} size="s" />
+                  <span className="text-body-m text-ink-muted">
+                    {active.name} · {genreOf(active).label}
+                  </span>
+                </span>
+                <span className="text-body-s text-ink-muted">
+                  <span className="font-mono text-mono-m text-ink">{accuracy.pct}%</span> of the
+                  last {accuracy.matches} results called
+                </span>
+                <span className="text-body-s text-ink-muted">
+                  <span className="font-mono text-mono-m text-ink">{accuracy.discoveries}</span>{' '}
+                  new tendencies learned
+                </span>
+              </div>
+            </div>
+
+            {/* The thesis, drawn: your shape and your next opponent's on one
+                grid. Everything else on this page is a reading of this. */}
+            <div className="mx-auto w-full max-w-sm shrink-0 lg:w-80">
+              <DnaRadar dimensions={core} series={series} size={300} labels="short" />
+              <RadarLegend series={series} className="mt-4 justify-center" />
+            </div>
+          </div>
+        </AngularPanel>
+      </Reveal>
+
+      <CoverageNote game={active} />
+
+      {/* The four panels ---------------------------------------------------- */}
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
+        <Reveal>
+          <HudPanel className="h-full p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <HudLabel className="text-signal">Your competitive DNA</HudLabel>
+                <div className="mt-1.5 font-display text-display-l font-bold text-ink">
+                  {mine.identity}
+                </div>
+                <p className="mt-1 text-body-m text-ink-muted">
+                  {mine.name} · {mine.team.record} · {mine.team.region}
+                </p>
+              </div>
+              <Button variant="ghost" onClick={() => navigate('/analyze')}>
+                Full profile
+                <ArrowRight />
+              </Button>
+            </div>
+
+            <DnaStrip dna={mine} className="mt-6" />
+
+            <ul className="mt-6 space-y-2 border-t border-line pt-4">
+              {mine.traits.map((trait) => (
+                <li key={trait} className="flex gap-3 text-body-m text-ink-muted">
+                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-signal" />
+                  {trait}
+                </li>
+              ))}
+            </ul>
+          </HudPanel>
+        </Reveal>
+
+        <Reveal delay={90}>
+          <AngularPanel
+            accent="ember"
+            fill="bg-surface/85"
+            className="h-full"
+            innerClassName="flex h-full flex-col p-6"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <HudLabel className="text-ember">Next match</HudLabel>
+              <span className="text-body-s text-ink-muted">
+                {fixture.format} · {fixture.kind}
+              </span>
+            </div>
+
+            <div className="mt-3 font-display text-display-l font-bold text-ink">
+              vs. {fixture.opponent.name}
+            </div>
+            <p className="mt-1 text-body-m text-ink-muted">
+              {matchup.theirs.identity} · {fixture.opponent.region} ·{' '}
+              {fixture.opponent.record}
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <FormRow form={fixture.opponent.form} />
+              <span className="text-body-s text-ink-muted">
+                Expected tempo:{' '}
+                <span className="font-mono text-mono-m text-ink">
+                  {matchup.expectedTempo.label}
+                </span>
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {matchup.dimensions
+                .filter((d) => d.favour !== 'even')
+                .slice(0, 2)
+                .map((dim) => (
+                  <MatchupMeter key={dim.key} dimension={dim} />
+                ))}
+            </div>
+
+            <div className="mt-6">
+              <HudLabel className="mb-2">Starts in</HudLabel>
+              <Countdown seconds={fixture.startsInSeconds} />
+            </div>
+
+            <div className="mt-auto flex flex-wrap gap-3 pt-6">
+              <Button variant="primary" onClick={() => navigate('/matchup')}>
+                <Target />
+                Matchup intelligence
+              </Button>
+              <Button onClick={() => navigate('/matchup/opponents')}>
+                <Radar />
+                Scout opponents
+              </Button>
+            </div>
+          </AngularPanel>
+        </Reveal>
       </div>
 
-      {/* Live now ---------------------------------------------------------- */}
+      {/* Edge and watch-out -------------------------------------------------- */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Reveal>
+          <InsightCard
+            size="l"
+            tone="edge"
+            eyebrow="Your edge"
+            title={
+              matchup.primaryEdge
+                ? `${matchup.primaryEdge.label}: ${matchup.primaryEdge.you} against their ${matchup.primaryEdge.them}`
+                : 'No decisive edge in this matchup'
+            }
+            body={
+              matchup.primaryEdge
+                ? `${matchup.theirExploitable[0].text}. This is the dimension to force the game into.`
+                : 'The two profiles are close on every dimension. This one will be decided on execution.'
+            }
+            source={`Against ${fixture.opponent.name} · ${fixture.kind}`}
+            action="See the full read"
+            onAction={() => navigate('/matchup')}
+          />
+        </Reveal>
+        <Reveal delay={90}>
+          <InsightCard
+            size="l"
+            tone="ember"
+            eyebrow="Watch out"
+            title={
+              matchup.primaryConcern
+                ? `${matchup.primaryConcern.label}: their ${matchup.primaryConcern.them} against your ${matchup.primaryConcern.you}`
+                : 'No standout vulnerability'
+            }
+            body={`${matchup.theirStrengths[0].text}. ${
+              matchup.prepFocus[0]?.action ?? ''
+            }`}
+            source={`Model confidence ${matchup.projection.confidence}%`}
+            action="Open prep focus"
+            onAction={() => navigate('/matchup')}
+          />
+        </Reveal>
+      </div>
+
+      {/* Recent insights ----------------------------------------------------- */}
       <section>
-        <SectionHeading
-          eyebrow={`Happening right now · ${scopeLabel}`}
-          title="Live matches"
+        <HudSection
+          eyebrow="Continuous learning"
+          title="Recent insights"
           action={
-            <Button variant="ghost" onClick={() => navigate('/compete/live')}>
-              All matches
+            <Button variant="ghost" onClick={() => navigate('/analyze/matches')}>
+              Match analysis
               <ArrowRight />
             </Button>
           }
         />
-        <div className="grid gap-4 lg:grid-cols-3">
-          {data.live.map((match, i) => (
-            <LiveMatchCard key={match.id} match={match} delay={i * 90} />
+        <div className="grid gap-3 lg:grid-cols-2">
+          {insights.map((row, i) => (
+            <Reveal key={row.id} delay={i * 70}>
+              <InsightCard
+                tone={row.tone}
+                eyebrow={row.eyebrow}
+                title={row.title}
+                body={row.body}
+                source={row.source}
+                action="Open"
+                onAction={() => navigate(row.to)}
+              />
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* Open scrims ------------------------------------------------------- */}
+      {/* Performance evolution ------------------------------------------------ */}
       <section>
-        <SectionHeading
-          eyebrow="Fill a slot"
-          title="Open scrims"
+        <HudSection
+          eyebrow="Performance evolution"
+          title="How your profile has moved"
           action={
-            <Button variant="ghost" onClick={() => navigate('/prep/scrims')}>
-              <Search />
-              Scrim finder
+            <Button variant="ghost" onClick={() => navigate('/analyze/trends')}>
+              <Trend />
+              Full history
             </Button>
           }
         />
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {data.scrims.map((scrim, i) => {
-            const t = tierOf(scrim.tier)
-            const g = gameOf(scrim)
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {core.map((dim, i) => {
+            const points = mine.history.map((frame) => frame.values[dim.key])
+            const delta = mine.deltas[dim.key]
             return (
-              <Reveal key={scrim.id} delay={i * 70}>
-                <HudPanel interactive className="group h-full p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <GameStamp game={g} />
-                    <span className="font-mono text-mono-m text-ink-muted">{scrim.format}</span>
-                  </div>
-                  <div className="mt-3 font-display text-display-m font-semibold text-ink">
-                    {scrim.team}
-                  </div>
-                  <div className="mt-1 text-body-s text-ink-muted">
-                    Starts {scrim.starts} · <span className={t.text}>{t.label}</span> · {scrim.region}
-                  </div>
-
-                  {/* One pip per roster seat, so a 3v3 title reads as 3. */}
-                  <div className="mt-4 flex items-center gap-1.5">
-                    {Array.from({ length: scrim.capacity }, (_, slot) => (
-                      <span
-                        key={slot}
-                        aria-hidden="true"
-                        className={`h-1.5 flex-1 rounded-full ${
-                          slot < scrim.capacity - scrim.slots ? 'bg-signal' : 'bg-raised'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-body-s text-ink-muted">
-                      {scrim.slots} of {scrim.capacity} open
-                    </span>
-                    <span className="text-body-s text-signal opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      Request →
+              <Reveal key={dim.key} delay={i * 60}>
+                <HudPanel interactive corners={false} className="p-4">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <HudLabel>{dim.label}</HudLabel>
+                    <span
+                      className={`font-mono text-body-s ${
+                        delta > 1 ? 'text-edge' : delta < -1 ? 'text-ember' : 'text-ink-muted'
+                      }`}
+                    >
+                      {delta > 0 ? '+' : delta < 0 ? '−' : '±'}
+                      {Math.abs(delta)}
                     </span>
                   </div>
+                  <div className="mt-2 flex items-end justify-between gap-3">
+                    <span className="font-display text-display-l font-bold text-ink">
+                      <AnimatedNumber value={mine.values[dim.key]} />
+                    </span>
+                    <Sparkline
+                      points={points}
+                      stroke={delta < -1 ? 'var(--color-ember)' : 'var(--color-signal)'}
+                    />
+                  </div>
+                  <p className="mt-2 text-body-s text-ink-muted">
+                    {mine.history[0].label} → {mine.history[mine.history.length - 1].label}
+                  </p>
                 </HudPanel>
               </Reveal>
             )
@@ -497,235 +370,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Browse by game ---------------------------------------------------- */}
-      <BrowseGames onPick={setGameId} activeId={gameId} />
-
-      {/* Events ------------------------------------------------------------ */}
+      {/* The ecosystem, below the intelligence -------------------------------- */}
       <section>
-        <SectionHeading
-          eyebrow="Circuit"
-          title="Current events"
+        <HudSection
+          eyebrow="Explore competition"
+          title="Live right now"
           action={
-            <Button variant="ghost" onClick={() => navigate('/compete/brackets')}>
-              <Calendar />
-              Full calendar
+            <Button variant="ghost" onClick={() => navigate('/compete/matches')}>
+              <Broadcast />
+              Match centre
             </Button>
           }
         />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {data.events.map((event, i) => (
-            <Reveal key={event.id} delay={i * 80}>
-              <HudPanel
-                interactive
-                glow={event.status === 'live' ? 'ember' : 'signal'}
-                className="h-full p-5"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-body-s ${
-                      STATUS[event.status].className
-                    }`}
-                  >
-                    {event.status === 'live' && <LivePip />}
-                    {STATUS[event.status].label}
-                  </span>
-                  <GameTile game={gameOf(event)} size="s" />
-                </div>
-
-                <h3 className="mt-4 font-display text-display-m font-semibold leading-tight text-ink">
-                  {event.name}
-                </h3>
-                <div className="mt-1 text-body-s text-ink-muted">
-                  {event.window} · {event.venue}
-                </div>
-
-                <div className="mt-5 flex items-end justify-between border-t border-line pt-4">
-                  <div>
-                    <HudLabel>Prize</HudLabel>
-                    <div className="mt-1 font-mono text-mono-m text-signal">{event.prize}</div>
+        <div className="grid gap-3 lg:grid-cols-3">
+          {liveNow.map((match, i) => {
+            const g = GAMES_BY_ID[match.gameId]
+            const t = tierOf(match.tier)
+            return (
+              <Reveal key={match.id} delay={i * 70}>
+                <HudPanel
+                  as="button"
+                  interactive
+                  glow="ember"
+                  onClick={() => navigate(`/compete/tournaments/${match.gameId}`)}
+                  className="w-full p-5 text-left"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex min-w-0 items-center gap-2 text-ember">
+                      <LivePip />
+                      <span className="hud-label truncate text-ember">{match.kind}</span>
+                    </span>
+                    <GameTile game={g} size="s" />
                   </div>
-                  <div className="text-right">
-                    <HudLabel>Teams</HudLabel>
-                    <div className="mt-1 font-mono text-mono-m text-ink">{event.teams}</div>
-                  </div>
-                  <div className="text-right">
-                    <HudLabel>Region</HudLabel>
-                    <div className="mt-1 font-mono text-mono-m text-ink">{event.region}</div>
-                  </div>
-                </div>
-              </HudPanel>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Top players + top teams ------------------------------------------- */}
-      <div className="grid gap-8 xl:grid-cols-2">
-        <section>
-          <SectionHeading
-            eyebrow="Ladder"
-            title={isAll ? 'Top players, all titles' : 'Top players'}
-          />
-          <HudPanel className="divide-y divide-line p-2">
-            {data.players.map((p, i) => {
-              const t = tierOf(p.tier)
-              const g = gameOf(p)
-              return (
-                <Reveal key={p.id} delay={i * 70} className="flex items-center gap-4 px-3 py-3">
-                  <span className="w-6 font-display text-display-m font-bold text-ink-muted">
-                    {i + 1}
-                  </span>
-                  <GameTile game={g} size="s" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="truncate font-display text-display-m font-semibold text-ink">
-                        {p.name}
-                      </span>
-                      <span className="truncate text-body-s text-ink-muted">
-                        {p.team} · {p.role}
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      <StatBar pct={(p.rating / maxRating) * 100} color={t.bg} delay={i * 70 + 200} />
-                    </div>
-                  </div>
-                  {/* Stat labels come from the title, not from Valorant. */}
-                  <div className="hidden text-right sm:block">
-                    {p.stats.map((stat) => (
-                      <div key={stat.label} className="font-mono text-mono-m text-ink-muted">
-                        {stat.value} {stat.label}
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate font-display text-display-m font-semibold text-ink">
+                        {match.sides[0]}
                       </div>
-                    ))}
-                  </div>
-                  <div className="w-16 text-right">
-                    <div className="font-mono text-mono-l text-ink">{p.rating}</div>
-                    <div
-                      className={`font-mono text-mono-m ${
-                        p.delta >= 0 ? 'text-signal' : 'text-ember'
-                      }`}
-                    >
-                      {p.delta >= 0 ? '+' : ''}
-                      {p.delta}
+                      <div className="truncate font-display text-display-m font-semibold text-ink-muted">
+                        {match.sides[1]}
+                      </div>
+                    </div>
+                    <div className="text-right font-mono text-mono-l text-ink">
+                      <div>{match.score[0]}</div>
+                      <div className="text-ink-muted">{match.score[1]}</div>
                     </div>
                   </div>
-                </Reveal>
-              )
-            })}
-          </HudPanel>
-        </section>
-
-        <section>
-          <SectionHeading eyebrow="Standings" title={isAll ? 'Teams on a run' : 'Top teams'} />
-          <HudPanel className="divide-y divide-line p-2">
-            {data.teams.map((team, i) => {
-              const t = tierOf(team.tier)
-              return (
-                <Reveal key={team.id} delay={i * 70} className="flex items-center gap-4 px-3 py-3">
-                  <span className="w-6 font-display text-display-m font-bold text-ink-muted">
-                    {i + 1}
-                  </span>
-                  <GameTile game={gameOf(team)} size="s" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-display text-display-m font-semibold text-ink">
-                      {team.name}
-                    </div>
-                    <div className="text-body-s">
-                      <span className={t.text}>{t.label}</span>
-                      <span className="text-ink-muted"> · {team.region}</span>
-                    </div>
+                  <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
+                    <span className={`text-body-s ${t.text}`}>{t.label}</span>
+                    <span className="font-mono text-body-s text-ink-muted">
+                      {(match.viewers / 1000).toFixed(1)}k watching
+                    </span>
                   </div>
-
-                  <div className="hidden items-center gap-1 sm:flex">
-                    {team.form.map((result, k) => (
-                      <span
-                        key={k}
-                        title={result === 'w' ? 'Win' : 'Loss'}
-                        className={`flex h-5 w-5 items-center justify-center rounded-[2px] font-mono text-body-s ${
-                          result === 'w' ? 'bg-signal/20 text-signal' : 'bg-ember/15 text-ember'
-                        }`}
-                      >
-                        {result.toUpperCase()}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="w-20 text-right">
-                    <div className="font-mono text-mono-m text-ink">{team.record}</div>
-                    <div className="text-body-s text-ink-muted">
-                      {team.streak > 0 ? `${team.streak} win streak` : 'No streak'}
-                    </div>
-                  </div>
-                </Reveal>
-              )
-            })}
-          </HudPanel>
-        </section>
-      </div>
-
-      {/* News + scene spotlight -------------------------------------------- */}
-      <div className="grid gap-8 xl:grid-cols-[2fr_1fr]">
-        <section>
-          <SectionHeading eyebrow="Wire" title="Top news" />
-          <div className="grid gap-4">
-            {data.news.map((item, i) => (
-              <Reveal key={item.id} delay={i * 70}>
-                <HudPanel as="article" interactive corners={i === 0} className={i === 0 ? 'p-6' : 'p-4'}>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <GameStamp game={gameOf(item)} />
-                    <span className="hud-label text-signal">{item.tag}</span>
-                    <span className="text-body-s text-ink-muted">{item.time}</span>
-                  </div>
-                  <h3
-                    className={`mt-2 font-display font-semibold leading-tight text-ink ${
-                      i === 0 ? 'text-display-l' : 'text-display-m'
-                    }`}
-                  >
-                    {item.headline}
-                  </h3>
                 </HudPanel>
               </Reveal>
-            ))}
-          </div>
-        </section>
+            )
+          })}
+        </div>
+        <p className="mt-4 text-body-s text-ink-muted">
+          {activityFor(active.id).players.toLocaleString()} {active.short} competitors on the
+          platform · {activityFor(active.id).scrims} scrims open today
+        </p>
+      </section>
 
-        <section>
-          <SectionHeading eyebrow="Scenes" title="Busiest right now" />
-          <div className="grid gap-3">
-            {[...GAMES]
-              .sort((a, b) => activityFor(b.id).live - activityFor(a.id).live)
-              .slice(0, 5)
-              .map((g, i) => {
-                const activity = activityFor(g.id)
-                const genre = genreOf(g)
-                return (
-                  <Reveal key={g.id} delay={i * 80}>
-                    <HudPanel
-                      as="button"
-                      interactive
-                      corners={false}
-                      onClick={() => setGameId(g.id)}
-                      className="flex w-full items-center gap-4 p-4 text-left"
-                    >
-                      <GameTile game={g} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-display text-display-m font-semibold text-ink">
-                          {g.name}
-                        </div>
-                        <div className={`truncate text-body-s ${genre.text}`}>
-                          {g.platform} · {g.regions.slice(0, 3).join(' · ')}
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <div className="font-mono text-mono-l text-ember">{activity.live}</div>
-                        <div className="text-body-s text-ink-muted">live</div>
-                      </div>
-                    </HudPanel>
-                  </Reveal>
-                )
-              })}
-          </div>
-        </section>
-      </div>
+      {/* How it works --------------------------------------------------------- */}
+      <section>
+        <HudSection
+          eyebrow="Under the hood"
+          title="What the intelligence is built from"
+        />
+        <IntelligencePipeline gameId={active.id} />
+      </section>
     </div>
   )
 }

@@ -7,17 +7,22 @@ import PolyBackdrop from './components/PolyBackdrop'
 import { LiveMatchProvider } from './live'
 import { GameProvider } from './gameContext'
 import Home from './pages/Home'
-import Overview from './pages/Overview'
+import Analyze from './pages/Analyze'
+import MatchAnalysis from './pages/MatchAnalysis'
+import Performance from './pages/Performance'
+import VodIntel from './pages/VodIntel'
+import Condition from './pages/Condition'
+import Matchup from './pages/Matchup'
+import Opponents from './pages/Opponents'
+import MatchCentre from './pages/MatchCentre'
+import Tournaments from './pages/Tournaments'
 import Scrims from './pages/Scrims'
-import VodReview from './pages/VodReview'
-import Wellness from './pages/Wellness'
-import Brackets from './pages/Brackets'
-import Live from './pages/Live'
-import Diagnostics from './pages/Diagnostics'
-import League from './pages/League'
-import LeagueBackers from './pages/LeagueBackers'
-import MyCard from './pages/MyCard'
-import OrgSearch from './pages/OrgSearch'
+import SetupCheck from './pages/SetupCheck'
+import NetworkPlayers from './pages/NetworkPlayers'
+import NetworkTeams from './pages/NetworkTeams'
+import NetworkBackers from './pages/NetworkBackers'
+import Talent from './pages/Talent'
+import Passport from './pages/Passport'
 
 export default function App() {
   const [railCollapsed, setRailCollapsed] = useState(false)
@@ -59,26 +64,42 @@ export default function App() {
           >
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/overview" element={<Overview />} />
-              <Route path="/prep/scrims" element={<Scrims />} />
-              <Route path="/prep/vod" element={<VodReview />} />
-              <Route path="/prep/wellness" element={<Wellness />} />
-              {/* Brackets drills down: titles -> a title's live feed and
-                  running tournaments -> one tournament's draw. */}
-              <Route path="/compete/brackets" element={<Brackets />} />
-              <Route path="/compete/brackets/:gameId" element={<Brackets />} />
-              <Route path="/compete/brackets/:gameId/:eventId" element={<Brackets />} />
-              <Route path="/compete/live" element={<Live />} />
-              <Route path="/compete/diagnostics" element={<Diagnostics />} />
-              {/* League: teams, and the schools and companies behind them. */}
-              <Route path="/league" element={<League />} />
-              <Route path="/league/team/:teamId" element={<League />} />
-              <Route path="/league/schools" element={<LeagueBackers kind="school" />} />
-              <Route path="/league/schools/:backerId" element={<LeagueBackers kind="school" />} />
-              <Route path="/league/orgs" element={<LeagueBackers kind="company" />} />
-              <Route path="/league/orgs/:backerId" element={<LeagueBackers kind="company" />} />
-              <Route path="/recruit/card" element={<MyCard />} />
-              <Route path="/recruit/orgs" element={<OrgSearch />} />
+
+              {/* Analyze: what happened, and what it says about you. */}
+              <Route path="/analyze" element={<Analyze />} />
+              <Route path="/analyze/matches" element={<MatchAnalysis />} />
+              <Route path="/analyze/trends" element={<Performance />} />
+              <Route path="/analyze/vod" element={<VodIntel />} />
+              <Route path="/analyze/condition" element={<Condition />} />
+
+              {/* Matchup: what that means against who is next. */}
+              <Route path="/matchup" element={<Matchup />} />
+              <Route path="/matchup/opponents" element={<Opponents />} />
+              <Route path="/matchup/opponents/:teamId" element={<Opponents />} />
+
+              {/* Compete: going and doing it. Tournaments drills down from
+                  titles to a title's circuit to one event's draw. */}
+              <Route path="/compete/matches" element={<MatchCentre />} />
+              <Route path="/compete/tournaments" element={<Tournaments />} />
+              <Route path="/compete/tournaments/:gameId" element={<Tournaments />} />
+              <Route path="/compete/tournaments/:gameId/:eventId" element={<Tournaments />} />
+              <Route path="/compete/scrims" element={<Scrims />} />
+              <Route path="/compete/setup" element={<SetupCheck />} />
+
+              {/* Network: the competitive graph - players, the teams they play
+                  for, and the schools and companies behind those. */}
+              <Route path="/network" element={<NetworkPlayers />} />
+              <Route path="/network/teams" element={<NetworkTeams />} />
+              <Route path="/network/teams/:teamId" element={<NetworkTeams />} />
+              <Route path="/network/schools" element={<NetworkBackers kind="school" />} />
+              <Route path="/network/schools/:backerId" element={<NetworkBackers kind="school" />} />
+              <Route path="/network/orgs" element={<NetworkBackers kind="company" />} />
+              <Route path="/network/orgs/:backerId" element={<NetworkBackers kind="company" />} />
+              <Route path="/network/talent" element={<Talent />} />
+
+              <Route path="/passport" element={<Passport />} />
+              <Route path="/passport/:playerId" element={<Passport />} />
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

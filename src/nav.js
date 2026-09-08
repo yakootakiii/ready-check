@@ -1,66 +1,89 @@
 import {
-  Home,
-  Grid,
-  Calendar,
-  Film,
-  Heart,
   Bracket,
   Broadcast,
-  Gauge,
-  IdCard,
-  Search,
-  Users,
-  School,
   Building,
+  Calendar,
+  Dna,
+  Film,
+  Gauge,
+  Heart,
+  Home,
+  IdCard,
+  Layers,
+  Radar,
+  School,
+  Sparkle,
+  Target,
+  Trend,
+  Users,
 } from './components/icons'
 
-// Groups match the left rail in spec §4: Overview, then Prep, Compete, Recruit.
+/**
+ * The rail, and the argument the product makes about itself.
+ *
+ * The modules are ordered as the competitive loop runs:
+ *
+ *     PLAY -> ANALYZE -> UNDERSTAND -> ADAPT -> OUTPLAY
+ *
+ * Analyze (what happened, and what it says about you) comes before Matchup
+ * (what that means against the next opponent), which comes before Compete
+ * (going and doing it). Network and Passport are the ecosystem either side of
+ * that loop - who else is out there, and what the loop has made of you.
+ *
+ * Adding a page means a route in `App.jsx` and an entry here.
+ */
 export const NAV_GROUPS = [
   {
     module: null,
     items: [
       { to: '/', label: 'Home', icon: Home, end: true },
-      { to: '/overview', label: 'Overview', icon: Grid },
+      { to: '/passport', label: 'Passport', icon: IdCard, end: true },
     ],
   },
   {
-    module: 'Prep',
+    module: 'Analyze',
     items: [
-      { to: '/prep/scrims', label: 'Scrims', icon: Calendar },
-      { to: '/prep/vod', label: 'VOD', icon: Film },
-      { to: '/prep/wellness', label: 'Wellness', icon: Heart },
+      { to: '/analyze', label: 'Competitive DNA', icon: Dna, end: true },
+      { to: '/analyze/matches', label: 'Match analysis', icon: Layers },
+      { to: '/analyze/trends', label: 'Performance', icon: Trend },
+      { to: '/analyze/vod', label: 'VOD intel', icon: Film },
+      { to: '/analyze/condition', label: 'Condition', icon: Heart },
+    ],
+  },
+  {
+    module: 'Matchup',
+    items: [
+      { to: '/matchup', label: 'Next match', icon: Target, end: true },
+      { to: '/matchup/opponents', label: 'Opponents', icon: Radar },
     ],
   },
   {
     module: 'Compete',
     items: [
-      { to: '/compete/brackets', label: 'Brackets', icon: Bracket },
-      { to: '/compete/live', label: 'Live', icon: Broadcast },
-      { to: '/compete/diagnostics', label: 'Diagnostics', icon: Gauge },
+      { to: '/compete/matches', label: 'Match centre', icon: Broadcast },
+      { to: '/compete/tournaments', label: 'Tournaments', icon: Bracket },
+      { to: '/compete/scrims', label: 'Scrims', icon: Calendar },
+      { to: '/compete/setup', label: 'Setup check', icon: Gauge },
     ],
   },
   {
-    module: 'League',
+    module: 'Network',
     items: [
-      { to: '/league', label: 'Teams', icon: Users, end: true },
-      { to: '/league/schools', label: 'Schools', icon: School },
-      { to: '/league/orgs', label: 'Organizations', icon: Building },
-    ],
-  },
-  {
-    module: 'Recruit',
-    items: [
-      { to: '/recruit/card', label: 'My card', icon: IdCard },
-      { to: '/recruit/orgs', label: 'Org search', icon: Search },
+      { to: '/network', label: 'Players', icon: Users, end: true },
+      { to: '/network/teams', label: 'Teams', icon: Target },
+      { to: '/network/schools', label: 'Schools', icon: School },
+      { to: '/network/orgs', label: 'Organizations', icon: Building },
+      { to: '/network/talent', label: 'Talent', icon: Sparkle },
     ],
   },
 ]
 
-// Mobile bottom tab bar - one tab per module (spec §8).
+// Mobile bottom tab bar - one tab per module. Passport is reachable from the
+// top bar's avatar, which is where a profile lives on every phone app anyway.
 export const MOBILE_TABS = [
   { to: '/', label: 'Home', icon: Home, end: true },
-  { to: '/prep/scrims', label: 'Prep', icon: Calendar, match: '/prep' },
-  { to: '/compete/live', label: 'Compete', icon: Broadcast, match: '/compete' },
-  { to: '/league', label: 'League', icon: Users, match: '/league' },
-  { to: '/recruit/card', label: 'Recruit', icon: IdCard, match: '/recruit' },
+  { to: '/analyze', label: 'Analyze', icon: Dna, match: '/analyze' },
+  { to: '/matchup', label: 'Matchup', icon: Target, match: '/matchup' },
+  { to: '/compete/matches', label: 'Compete', icon: Broadcast, match: '/compete' },
+  { to: '/network', label: 'Network', icon: Users, match: '/network' },
 ]

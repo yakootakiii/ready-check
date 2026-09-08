@@ -1,9 +1,14 @@
 import { formatClock } from '../format'
 
 /**
- * The core interaction of VOD review: markers on the scrubber, click to seek
- * (spec §5.3). The scrubber itself stays plain - the value is in the tagging
- * layer, not custom video chrome.
+ * The core interaction of VOD review: markers on the scrubber, click to seek.
+ * The scrubber itself stays plain - the value is in the tagging layer, not in
+ * custom video chrome.
+ *
+ * Markers are coloured by who put them there. The model's own flags read in
+ * signal, the ones a player added read in ember, and the difference is not
+ * decoration: a reviewer has to be able to tell what the system proposed from
+ * what a human confirmed, or "AI VOD analysis" becomes unfalsifiable.
  */
 export default function VodTimeline({ duration, position, tags, onSeek }) {
   return (
@@ -26,14 +31,18 @@ export default function VodTimeline({ duration, position, tags, onSeek }) {
               key={tag.id}
               type="button"
               onClick={() => onSeek(tag.at)}
-              title={`${formatClock(tag.at)} — ${tag.label}`}
+              title={`${formatClock(tag.at)} — ${tag.label}${
+                tag.source === 'model' ? ' (model flagged)' : ''
+              }`}
               aria-label={`Jump to ${formatClock(tag.at)}, ${tag.label}`}
               style={{ left: `${(tag.at / duration) * 100}%` }}
               className="absolute top-0 -translate-x-1/2"
             >
               <span
                 aria-hidden="true"
-                className="block h-0 w-0 border-x-4 border-b-[6px] border-x-transparent border-b-ember transition-transform duration-100 hover:scale-125"
+                className={`block h-0 w-0 border-x-4 border-b-[6px] border-x-transparent transition-transform duration-100 hover:scale-125 ${
+                tag.source === 'model' ? 'border-b-signal' : 'border-b-ember'
+              }`}
               />
             </button>
           ))}

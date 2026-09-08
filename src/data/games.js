@@ -1,11 +1,22 @@
 /**
- * The title catalog. Ready Check is game-agnostic, so nothing in the UI may
+ * The title catalog. Outplay is game-agnostic, so nothing in the UI may
  * assume Valorant (or even PC): a title carries its own roles, its own stat
  * vocabulary, its own word for a unit of play, and its own strong regions.
  *
  * `genre` drives the accent colour, so a tile's colour tells you what kind of
  * game it is before you read the name. `platform` drives real behaviour -
  * mobile titles get thermal/battery diagnostics instead of frame rate.
+ *
+ * Two things here exist for the intelligence layer specifically:
+ *
+ * - `INTEL_COVERAGE` says how deep the model actually is for a title. The
+ *   product is honest about this: one title is modelled properly, a few are
+ *   in calibration, the rest are ecosystem-only. Screens read it and say so
+ *   rather than implying every scene has the same depth of analysis.
+ * - `GENRE_LEXICON` gives the insight writer the right nouns. "Objective
+ *   control" means towers in a MOBA, site control in a tactical shooter and
+ *   zone timing in a battle royale, so the language is keyed to genre rather
+ *   than hardcoded to one game or duplicated 25 times.
  *
  * Team and player names throughout the app are fictional on purpose; only the
  * game titles are real.
@@ -231,8 +242,122 @@ export const genreOf = (game) => GENRES[game.genre]
  */
 export const monogram = (game) => game.mono ?? game.short.slice(0, 2)
 
-export const gamesByPlatform = () =>
-  PLATFORMS.map((platform) => ({
-    platform,
-    games: GAMES.filter((g) => g.platform === platform),
-  }))
+/**
+ * How deep the intelligence model runs for a title.
+ *
+ * Outplay's MVP models one game properly rather than claiming twenty-five.
+ * `full` means Competitive DNA, matchup intelligence and post-match learning
+ * are all live; `beta` means the model is calibrating and its confidence is
+ * shown as provisional; `planned` means the title has an ecosystem on the
+ * platform - ladders, teams, tournaments, scrims - but no behavioural model
+ * yet. Anything unlisted is `planned`.
+ */
+export const INTEL_COVERAGE = {
+  valorant: 'full',
+  mlbb: 'beta',
+  cs2: 'beta',
+  dota2: 'beta',
+  lol: 'beta',
+}
+
+export const COVERAGE = {
+  full: {
+    key: 'full',
+    label: 'Full intelligence',
+    short: 'Full',
+    note: 'Competitive DNA, matchup intelligence and post-match learning are live.',
+    text: 'text-edge',
+    border: 'border-edge',
+    bg: 'bg-edge',
+  },
+  beta: {
+    key: 'beta',
+    label: 'Calibrating',
+    short: 'Beta',
+    note: 'The model is still calibrating on this title. Treat confidence as provisional.',
+    text: 'text-signal',
+    border: 'border-signal',
+    bg: 'bg-signal',
+  },
+  planned: {
+    key: 'planned',
+    label: 'Ecosystem only',
+    short: 'Planned',
+    note: 'Ladders, teams and tournaments are covered. Behavioural modelling is not live yet.',
+    text: 'text-ink-muted',
+    border: 'border-line',
+    bg: 'bg-raised',
+  },
+}
+
+export const coverageKeyOf = (game) => INTEL_COVERAGE[game?.id] ?? 'planned'
+
+export const coverageOf = (game) => COVERAGE[coverageKeyOf(game)]
+
+/**
+ * The words an insight uses, keyed by genre.
+ *
+ * An insight that says "they contest objectives early" has to mean towers in a
+ * MOBA and site control in a tactical shooter. Keying the vocabulary to genre
+ * gives every one of the 25 titles usable language from seven entries, and
+ * keeps the insight writer from hardcoding one game's nouns.
+ *
+ * @property objective  what a team fights over
+ * @property early      the opening phase of one unit of play
+ * @property late       the closing phase
+ * @property plan       the pre-round or pre-game decision layer
+ * @property space      the resource a side takes when it plays forward
+ */
+export const GENRE_LEXICON = {
+  tactical: {
+    objective: 'site control',
+    early: 'opening duels',
+    late: 'post-plant and retakes',
+    plan: 'buy and utility plan',
+    space: 'map control',
+  },
+  moba: {
+    objective: 'objective control',
+    early: 'the laning phase',
+    late: 'late-game teamfights',
+    plan: 'the draft',
+    space: 'vision and jungle space',
+  },
+  br: {
+    objective: 'zone positioning',
+    early: 'the early drop',
+    late: 'final circles',
+    plan: 'the landing plan',
+    space: 'rotation timing',
+  },
+  fighting: {
+    objective: 'neutral control',
+    early: 'the first two rounds',
+    late: 'the final round',
+    plan: 'character and counterpick',
+    space: 'screen position',
+  },
+  sports: {
+    objective: 'possession',
+    early: 'the opening minutes',
+    late: 'the closing minutes',
+    plan: 'formation and rotation',
+    space: 'the attacking half',
+  },
+  strategy: {
+    objective: 'board control',
+    early: 'the opening build',
+    late: 'the late game',
+    plan: 'the composition plan',
+    space: 'tempo and economy',
+  },
+  hero: {
+    objective: 'point control',
+    early: 'the first fight',
+    late: 'overtime',
+    plan: 'the composition',
+    space: 'high ground and space',
+  },
+}
+
+export const lexiconOf = (game) => GENRE_LEXICON[game?.genre] ?? GENRE_LEXICON.tactical

@@ -32,14 +32,14 @@ function GamePicker() {
   // the top bar and this grid never disagree.
   const open = (id) => {
     setGameId(id)
-    navigate(`/compete/brackets/${id}`)
+    navigate(`/compete/tournaments/${id}`)
   }
 
   return (
     <div>
       <HudPageHeader
         eyebrow="Circuit"
-        title="Brackets"
+        title="Tournaments"
         subtitle="Pick a title to see its running tournaments and the match on air right now."
       />
 
@@ -150,7 +150,7 @@ function GameCircuit({ game }) {
           matches.length
         } matches on air`}
         action={
-          <Button onClick={() => navigate('/compete/brackets')}>Change title</Button>
+          <Button onClick={() => navigate('/compete/tournaments')}>Change title</Button>
         }
       />
 
@@ -179,7 +179,7 @@ function GameCircuit({ game }) {
                   interactive
                   glow={running ? 'ember' : 'signal'}
                   disabled={!running}
-                  onClick={() => navigate(`/compete/brackets/${game.id}/${event.id}`)}
+                  onClick={() => navigate(`/compete/tournaments/${game.id}/${event.id}`)}
                   className={`h-full w-full p-5 text-left ${
                     running ? '' : 'cursor-default opacity-60'
                   }`}
@@ -293,7 +293,7 @@ function EventBracket({ game, event }) {
             <Button onClick={() => setShowFeed((v) => !v)}>
               {showFeed ? 'Hide live feed' : 'Show live feed'}
             </Button>
-            <Button onClick={() => navigate(`/compete/brackets/${game.id}`)}>
+            <Button onClick={() => navigate(`/compete/tournaments/${game.id}`)}>
               All {game.short} events
             </Button>
           </div>
@@ -352,7 +352,7 @@ function EventBracket({ game, event }) {
    Router glue.
    --------------------------------------------------------------------------- */
 
-export default function Brackets() {
+export default function Tournaments() {
   const { gameId, eventId } = useParams()
   const game = gameId ? GAMES_BY_ID[gameId] : null
 

@@ -5,11 +5,13 @@ import { HudLabel, HudPageHeader, HudPanel, LivePip } from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
 import { ArrowRight } from '../components/icons'
 import { acrossGames, openScrimsFor } from '../data/generate'
+import { nextFixture, sparringLikeness } from '../data/matchup'
+import { player } from '../data/mock'
 import { GAMES_BY_ID, genreOf } from '../data/games'
 import { tier as tierOf } from '../tiers'
 import { useGame } from '../gameContext'
 
-function ScrimRow({ scrim, showGame, requested, onRequest, delay }) {
+function ScrimRow({ scrim, showGame, requested, onRequest, delay, likeness }) {
   const game = GAMES_BY_ID[scrim.gameId]
   const t = tierOf(scrim.tier)
   const filled = scrim.capacity - scrim.slots
@@ -28,7 +30,15 @@ function ScrimRow({ scrim, showGame, requested, onRequest, delay }) {
 
       <div className="min-w-44 flex-1">
         <div className="text-body-m text-ink">{scrim.team}</div>
-        <div className="text-body-s text-ink-muted">{scrim.window}</div>
+        {/* The reason to take this scrim over another one: how closely this
+            side's Competitive DNA resembles the team you play next. */}
+        {likeness && likeness.similarity >= 55 ? (
+          <div className="text-body-s text-signal">
+            Plays like {likeness.target.name} · {likeness.similarity}% style match
+          </div>
+        ) : (
+          <div className="text-body-s text-ink-muted">{scrim.window}</div>
+        )}
       </div>
 
       {/* One pip per roster seat, so a 3v3 title reads as three. */}
@@ -61,15 +71,37 @@ function ScrimRow({ scrim, showGame, requested, onRequest, delay }) {
   )
 }
 
+/**
+ * The scrim finder, with one thing added that changes what it is for.
+ *
+ * A scrim board normally sorts by rank and availability. Outplay can do
+ * something a board cannot: rank the offers by how closely each side's
+ * Competitive DNA resembles the team you actually play next, so a practice
+ * block is preparation rather than volume. That ordering is the default here,
+ * and the reason is printed on every row.
+ */
 export default function Scrims() {
   const { gameId, game, isAll } = useGame()
   const [requested, setRequested] = useState([])
   const [openOnly, setOpenOnly] = useState(false)
+  const [byLikeness, setByLikeness] = useState(true)
 
-  const scrims = useMemo(
-    () => (isAll ? acrossGames(openScrimsFor, { limit: 14 }) : openScrimsFor(gameId)),
-    [gameId, isAll],
-  )
+  const activeId = game ? game.id : player.primaryGameId
+  const fixture = nextFixture(activeId)
+
+  const scrims = useMemo(() => {
+    const rows = isAll ? acrossGames(openScrimsFor, { limit: 14 }) : openScrimsFor(gameId)
+    const withLikeness = rows.map((scrim) => ({
+      ...scrim,
+      likeness: sparringLikeness(scrim.gameId, scrim.team),
+    }))
+    return byLikeness
+      ? [...withLikeness].sort(
+          (a, b) => (b.likeness?.similarity ?? -1) - (a.likeness?.similarity ?? -1),
+        )
+      : withLikeness
+  }, [gameId, isAll, byLikeness])
+
   const visible = openOnly ? scrims.filter((s) => s.open) : scrims
   const openCount = scrims.filter((s) => s.open).length
 
@@ -89,14 +121,17 @@ export default function Scrims() {
     <div>
       <HudPageHeader
         eyebrow={game ? genreOf(game).label : 'Every title'}
-        title="Find a scrim"
-        subtitle="Requests go straight to the team's captain."
+        title="Scrims"
+        subtitle={`Ordered by how closely each side plays like ${fixture.opponent.name}, your next opponent.`}
         action={
           <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-2 text-body-s text-ink-muted">
-              <LivePip className="text-signal" />
+              <LivePip className="text-edge" />
               {openCount} open now
             </span>
+            <Button onClick={() => setByLikeness((v) => !v)}>
+              {byLikeness ? 'By style match' : 'By listing order'}
+            </Button>
             <Button onClick={() => setOpenOnly((v) => !v)}>
               {openOnly ? 'Showing open only' : 'Show open only'}
             </Button>
@@ -130,6 +165,7 @@ export default function Scrims() {
                 scrim={scrim}
                 showGame={isAll}
                 delay={Math.min(i, 10) * 45}
+                likeness={scrim.likeness}
                 requested={requested.includes(scrim.id)}
                 onRequest={(id) => setRequested((list) => [...list, id])}
               />
@@ -145,9 +181,15 @@ export default function Scrims() {
         )}
       </HudPanel>
 
-      <HudLabel className="mt-4">
-        {visible.length} of {scrims.length} listings shown
-      </HudLabel>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <HudLabel>
+          {visible.length} of {scrims.length} listings shown
+        </HudLabel>
+        <span className="text-body-s text-ink-muted">
+          Style match compares a side's Competitive DNA with {fixture.opponent.name}'s across all
+          twelve dimensions. A high number means the practice transfers.
+        </span>
+      </div>
     </div>
   )
 }

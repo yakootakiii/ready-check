@@ -1,5 +1,5 @@
 /**
- * The League module's data: who backs each team, what they have won, who plays
+ * The Network module's data: who backs each team, what they have won, who plays
  * for them, and the school programs that run rosters across several titles.
  *
  * Built on top of generate.js rather than beside it — a team here is the same
@@ -47,7 +47,6 @@ const BACKERS_BY_ID = Object.fromEntries(
   ),
 )
 
-export const backerById = (id) => BACKERS_BY_ID[id] ?? null
 
 /* --- Seeded helpers ------------------------------------------------------- */
 

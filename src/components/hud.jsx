@@ -211,7 +211,14 @@ export function Gauge({ value, max = 100, size = 168, tone = 'signal', run = tru
   )
 }
 
-/** Win/loss chips for a recent-form readout. */
+/**
+ * Win/loss chips for a recent-form readout.
+ *
+ * A win is `edge`, not `signal`. Signal means "you" everywhere else in the
+ * product, and a form row is read against opponents as often as against your
+ * own team — colouring a win as "you" would make an opponent's win streak read
+ * as yours.
+ */
 export function FormRow({ form, className = '' }) {
   return (
     <div className={`flex items-center gap-1 ${className}`}>
@@ -220,7 +227,7 @@ export function FormRow({ form, className = '' }) {
           key={i}
           title={result === 'w' ? 'Win' : 'Loss'}
           className={`flex h-5 w-5 items-center justify-center rounded-[2px] font-mono text-body-s ${
-            result === 'w' ? 'bg-signal/20 text-signal' : 'bg-ember/15 text-ember'
+            result === 'w' ? 'bg-edge/20 text-edge' : 'bg-ember/15 text-ember'
           }`}
         >
           {result.toUpperCase()}

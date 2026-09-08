@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import GameTile from '../components/GameTile'
-import LeagueTabs from '../components/LeagueTabs'
+import NetworkTabs from '../components/NetworkTabs'
 import Reveal from '../components/Reveal'
 import {
   FormRow,
@@ -14,10 +14,22 @@ import {
 } from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
 import { ArrowRight, Building, School, Search, Trophy, Users } from '../components/icons'
-import { GAMES_BY_ID, genreOf } from '../data/games'
+import { coverageKeyOf, genreOf } from '../data/games'
+import { teamDna } from '../data/dna'
 import { allTeams, findTeam, teamProfile } from '../data/league'
 import { tier as tierOf } from '../tiers'
 import { useGame } from '../gameContext'
+
+/**
+ * The Network's team directory, and the shared bits the other Network screens
+ * reuse.
+ *
+ * Team cards lead with the identity the model composed rather than with the
+ * record, on the titles the engine has actually been calibrated on. On the
+ * other twenty they stay a record and a form line — inventing a profile for a
+ * scene the model has not seen would undercut the one claim the product is
+ * making.
+ */
 
 /** A gold/silver/bronze cue for a placement, so podiums read at a glance. */
 export const placementTone = (placement) =>
@@ -107,7 +119,7 @@ function TeamDirectory() {
   return (
     <div>
       <HudPageHeader
-        eyebrow="League"
+        eyebrow="Competitive network"
         title="Teams"
         subtitle={
           game
@@ -122,7 +134,7 @@ function TeamDirectory() {
         }
       />
 
-      <LeagueTabs />
+      <NetworkTabs />
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
@@ -183,7 +195,7 @@ function TeamDirectory() {
                 <HudPanel
                   as="button"
                   interactive
-                  onClick={() => navigate(`/league/team/${team.id}`)}
+                  onClick={() => navigate(`/network/teams/${team.id}`)}
                   className="flex h-full w-full flex-col p-5 text-left"
                 >
                   <div className="flex items-start gap-3">
@@ -198,6 +210,16 @@ function TeamDirectory() {
                     </div>
                     <BackerBadge backer={team.backer} />
                   </div>
+
+                  {/* The identity the model composed, where a scene the engine
+                      has been calibrated on can support one. On the other
+                      twenty titles the card stays a record and a form line
+                      rather than inventing a profile. */}
+                  {coverageKeyOf(team.game) !== 'planned' && (
+                    <div className="mt-3 truncate text-body-m text-signal">
+                      {teamDna(team).identity}
+                    </div>
+                  )}
 
                   <div className="mt-4 flex items-baseline justify-between">
                     <span className="font-mono text-mono-l text-ink">{team.winRate}%</span>
@@ -252,7 +274,7 @@ function TeamDetail({ team }) {
         subtitle={`Founded ${team.founded} · ${team.roster.length} active ${
           team.roster.length === 1 ? 'player' : 'players'
         }`}
-        action={<Button onClick={() => navigate('/league')}>All teams</Button>}
+        action={<Button onClick={() => navigate('/network/teams')}>All teams</Button>}
       />
 
       {/* Headline ----------------------------------------------------------- */}
@@ -349,7 +371,7 @@ function TeamDetail({ team }) {
               <HudLabel>{team.backer.type === 'school' ? 'Program of' : 'Operated by'}</HudLabel>
               <button
                 type="button"
-                onClick={() => navigate(`/league/${backerRoute}/${team.backer.id}`)}
+                onClick={() => navigate(`/network/${backerRoute}/${team.backer.id}`)}
                 className="mt-3 flex w-full items-center gap-3 text-left transition-colors duration-150 hover:text-signal"
               >
                 {team.backer.type === 'school' ? (
@@ -405,7 +427,7 @@ function TeamDetail({ team }) {
               </ul>
               <Button
                 className="mt-4 w-full"
-                onClick={() => navigate(`/compete/brackets/${team.gameId}`)}
+                onClick={() => navigate(`/compete/tournaments/${team.gameId}`)}
               >
                 View brackets
               </Button>
@@ -421,7 +443,7 @@ function TeamDetail({ team }) {
    Router glue
    --------------------------------------------------------------------------- */
 
-export default function League() {
+export default function NetworkTeams() {
   const { teamId } = useParams()
 
   if (teamId) {

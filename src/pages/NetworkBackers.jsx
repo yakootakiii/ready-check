@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import GameTile from '../components/GameTile'
-import LeagueTabs from '../components/LeagueTabs'
+import NetworkTabs from '../components/NetworkTabs'
 import Reveal from '../components/Reveal'
 import {
   HudLabel,
@@ -12,7 +12,7 @@ import {
   StatBar,
 } from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
-import { AccoladeRow, placementTone } from './League'
+import { AccoladeRow, placementTone } from './NetworkTeams'
 import { ArrowRight, Building, School, Search, Trophy, Users } from '../components/icons'
 import { genreOf } from '../data/games'
 import { backerProfile, companiesWithRosters, schoolsWithRosters } from '../data/league'
@@ -22,10 +22,15 @@ import { tier as tierOf } from '../tiers'
  * Schools and companies share a shape — both back rosters across titles — so
  * they share this screen. `kind` only changes the copy, the icon and which
  * pool is listed.
+ *
+ * Schools stay a first-class entity in the Network rather than a filter on
+ * organisations. The platform launches into a scene where the university
+ * programme is often the whole pipeline, and burying it under a generic
+ * "orgs" list would misrepresent how Philippine esports actually works.
  */
 const KINDS = {
   school: {
-    eyebrow: 'League',
+    eyebrow: 'Competitive network',
     title: 'Schools',
     subtitle: 'Universities and colleges fielding an active esports roster.',
     icon: School,
@@ -36,7 +41,7 @@ const KINDS = {
     empty: 'No school matches that search.',
   },
   company: {
-    eyebrow: 'League',
+    eyebrow: 'Competitive network',
     title: 'Organizations',
     subtitle: 'Companies operating rosters across the circuit.',
     icon: Building,
@@ -86,7 +91,7 @@ function BackerDirectory({ kind }) {
         }
       />
 
-      <LeagueTabs />
+      <NetworkTabs />
 
       <label className="mb-5 flex items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
         <Search className="shrink-0 text-ink-muted" />
@@ -110,7 +115,7 @@ function BackerDirectory({ kind }) {
                 <HudPanel
                   as="button"
                   interactive
-                  onClick={() => navigate(`/league/${config.route}/${backer.id}`)}
+                  onClick={() => navigate(`/network/${config.route}/${backer.id}`)}
                   className="flex h-full w-full flex-col p-5 text-left"
                 >
                   <div className="flex items-start gap-4">
@@ -218,7 +223,7 @@ function BackerDetail({ backer }) {
           backer.games.length
         } ${backer.games.length === 1 ? 'title' : 'titles'}`}
         action={
-          <Button onClick={() => navigate(`/league/${config.route}`)}>
+          <Button onClick={() => navigate(`/network/${config.route}`)}>
             All {config.title.toLowerCase()}
           </Button>
         }
@@ -267,7 +272,7 @@ function BackerDetail({ backer }) {
                 <HudPanel
                   as="button"
                   interactive
-                  onClick={() => navigate(`/league/team/${team.id}`)}
+                  onClick={() => navigate(`/network/teams/${team.id}`)}
                   className="w-full p-5 text-left"
                 >
                   <div className="flex items-start gap-3">
@@ -391,7 +396,7 @@ function BackerDetail({ backer }) {
    Router glue
    --------------------------------------------------------------------------- */
 
-export default function LeagueBackers({ kind }) {
+export default function NetworkBackers({ kind }) {
   const { backerId } = useParams()
 
   if (backerId) {

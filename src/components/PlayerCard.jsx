@@ -3,26 +3,41 @@ import GameTile from './GameTile'
 import RankBadge from './RankBadge'
 import { Button } from './ui'
 import { HudLabel, HudPanel } from './hud'
+import { DnaStrip } from './DnaDimensions'
+import { ConfidenceMeter } from './CompetitiveIdentity'
+import { InsightBullet } from './InsightCard'
 import { Play } from './icons'
 import { tier as tierOf } from '../tiers'
 import { GAMES_BY_ID, genreOf } from '../data/games'
 
 /**
- * The recruitment unit, and literally the public Profile page - the only
- * difference is whether the org-facing actions are rendered (spec §5.5).
+ * The passport card - the unit an organisation actually reads.
  *
- * The card renders one `profile` (a title the player competes in), so the
- * role, tier and headline stats come from that title's vocabulary rather than
- * from a fixed set of Valorant fields.
+ * The previous product's version of this card led with "Diamond · 2410", and
+ * that ordering was the whole problem: a rank ranks a player against everyone
+ * and describes them to nobody. Here the identity the model composed leads,
+ * the three traits behind it sit under it, the Competitive DNA strip gives the
+ * shape, and rank has been demoted to one chip among the supporting numbers.
+ *
+ * It renders one `profile` - a title the player competes in - so role, tier
+ * and headline stats come from that title's own vocabulary rather than from a
+ * fixed set of Valorant fields.
  */
-export default function PlayerCard({ player, profile, highlights = [], orgActions = false }) {
+export default function PlayerCard({
+  player,
+  profile,
+  dna,
+  highlights = [],
+  orgActions = false,
+  trajectory,
+}) {
   const game = GAMES_BY_ID[profile.gameId]
   const t = tierOf(profile.tier)
 
   return (
     <HudPanel className="p-6">
       <div className="flex flex-wrap gap-6">
-        {/* The angular player-photo frame, carrying the tier colour. */}
+        {/* The angular photo frame, carrying the tier colour. */}
         <AngularPanel
           accent={profile.tier}
           fill="bg-raised"
@@ -41,33 +56,75 @@ export default function PlayerCard({ player, profile, highlights = [], orgAction
             {profile.role} · {game.name}
             <span className={genreOf(game).text}>{genreOf(game).label}</span>
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <RankBadge tier={profile.tier} />
+
+          {dna && (
+            <>
+              <div className="mt-4">
+                <HudLabel className="text-signal">Competitive identity</HudLabel>
+                <div className="mt-1 font-display text-display-l font-bold text-ink">
+                  {dna.identity}
+                </div>
+              </div>
+              <ul className="mt-3 space-y-1.5">
+                {dna.traits.map((trait) => (
+                  <InsightBullet key={trait} tone="edge">
+                    {trait}
+                  </InsightBullet>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {/* Rank, deliberately below the identity rather than above it. */}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <RankBadge tier={profile.tier} size="s" />
             <span className="font-mono text-mono-m text-ink-muted">
               {profile.rating} rating · {profile.region}
             </span>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {[
-              { label: 'Win rate', value: profile.winRate },
-              { label: 'Scrims logged', value: profile.scrimsLogged },
-              // Headline stats are whatever this scene actually quotes.
-              ...profile.stats,
-              { label: 'Availability', value: profile.availability },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-base border border-line bg-raised/60 p-3">
-                <HudLabel>{stat.label}</HudLabel>
-                <div className="mt-1.5 font-mono text-mono-m text-ink">{stat.value}</div>
-              </div>
-            ))}
+            {trajectory && (
+              <span
+                className={`text-body-s ${
+                  trajectory.tone === 'edge'
+                    ? 'text-edge'
+                    : trajectory.tone === 'ember'
+                      ? 'text-ember'
+                      : 'text-ink-muted'
+                }`}
+              >
+                {trajectory.label}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
+      {dna && (
+        <div className="mt-6 border-t border-line pt-6">
+          <HudLabel className="mb-3">Competitive DNA</HudLabel>
+          <DnaStrip dna={dna} />
+        </div>
+      )}
+
+      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-6 sm:grid-cols-3 lg:grid-cols-5">
+        {[
+          { label: 'Win rate', value: profile.winRate },
+          { label: 'Matches analysed', value: profile.matchesAnalyzed },
+          // Headline stats are whatever this scene actually quotes.
+          ...profile.stats,
+          { label: 'Availability', value: profile.availability },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-base border border-line bg-raised/60 p-3">
+            <HudLabel>{stat.label}</HudLabel>
+            <div className="mt-1.5 font-mono text-mono-m text-ink">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {dna && <ConfidenceMeter dna={dna} className="mt-6" />}
+
       {highlights.length > 0 && (
         <div className="mt-6 border-t border-line pt-6">
-          <HudLabel className="text-signal">Highlight VODs ({highlights.length})</HudLabel>
+          <HudLabel className="text-signal">Notable performances ({highlights.length})</HudLabel>
           <ul className="mt-3 grid gap-2 sm:grid-cols-3">
             {highlights.map((clip) => (
               <li key={clip.id}>
@@ -76,7 +133,14 @@ export default function PlayerCard({ player, profile, highlights = [], orgAction
                   className="flex w-full items-center gap-3 rounded-base border border-line bg-raised px-3 py-2 text-left transition-colors duration-100 hover:bg-line"
                 >
                   <Play className="shrink-0 text-signal" />
-                  <span className="flex-1 truncate text-body-m text-ink">{clip.label}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-body-m text-ink">{clip.label}</span>
+                    {clip.dimension && (
+                      <span className="block truncate text-body-s text-ink-muted">
+                        Cited for {clip.dimension}
+                      </span>
+                    )}
+                  </span>
                   <span className="font-mono text-mono-m text-ink-muted">{clip.length}</span>
                 </button>
               </li>
@@ -95,7 +159,7 @@ export default function PlayerCard({ player, profile, highlights = [], orgAction
   )
 }
 
-/** Switches which of the player's titles the card is showing. */
+/** Switches which of the player's titles the passport is showing. */
 export function ProfileTabs({ player, activeGameId, onSelect }) {
   return (
     <div className="mb-4 flex flex-wrap gap-2">

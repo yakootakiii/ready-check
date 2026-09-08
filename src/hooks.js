@@ -43,31 +43,3 @@ export function useTickingClock(startSeconds) {
 
   return seconds
 }
-
-/**
- * Advances an index on a timer, resetting the timer whenever the index changes
- * so a manual pick gets a full dwell before the next auto-advance.
- *
- * Auto-advance is suppressed under prefers-reduced-motion, and `paused` is
- * driven by hover/focus - content that moves itself is only acceptable when
- * the reader can stop it.
- */
-export function useCarousel(length, { interval = 7000, paused = false } = {}) {
-  const [index, setIndex] = useState(0)
-
-  // Keep the index in range when the slide list changes underneath it.
-  const safeIndex = length > 0 ? index % length : 0
-
-  useEffect(() => {
-    if (paused || length <= 1 || prefersReducedMotion()) return
-    const id = setTimeout(() => setIndex((i) => (i + 1) % length), interval)
-    return () => clearTimeout(id)
-  }, [safeIndex, length, interval, paused])
-
-  return {
-    index: safeIndex,
-    setIndex,
-    next: () => setIndex((i) => (i + 1) % length),
-    prev: () => setIndex((i) => (i - 1 + length) % length),
-  }
-}

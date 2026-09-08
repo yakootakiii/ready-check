@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import Reveal from '../components/Reveal'
 import Sparkline from '../components/Sparkline'
 import {
@@ -9,7 +10,21 @@ import {
   HudSection,
   StatBar,
 } from '../components/hud'
+import { Button } from '../components/ui'
+import { Dna } from '../components/icons'
+import { dimensionOf } from '../data/dna'
 import { readiness, wellness } from '../data/mock'
+
+/**
+ * Condition - the one screen where readiness still lives, and deliberately the
+ * quietest screen in Analyze.
+ *
+ * Readiness was the headline number of the previous product. Here it is an
+ * input: something that explains why consistency read low in a given week, not
+ * something that describes a competitor. Each signal therefore names the
+ * Competitive DNA dimension it is being used to explain, and the page says so
+ * out loud rather than leaving the demotion implicit.
+ */
 
 // Sleep clusters between 6 and 8 hours, so a 0-based axis flattens the whole
 // week into identical bars. The axis starts at 5h instead - and the legend
@@ -20,7 +35,8 @@ const SLEEP_CEILING = 9
 const MAX_LOAD = 6
 const CHART_H = 140
 
-export default function Wellness() {
+export default function Condition() {
+  const navigate = useNavigate()
   const best = wellness.week.reduce((a, b) => (b.score > a.score ? b : a))
   const worst = wellness.week.reduce((a, b) => (b.score < a.score ? b : a))
   const avgSleep = wellness.week.reduce((s, d) => s + d.sleep, 0) / wellness.week.length
@@ -29,10 +45,25 @@ export default function Wellness() {
   return (
     <div className="space-y-10">
       <HudPageHeader
-        eyebrow="Condition"
-        title="Wellness"
-        subtitle="Readiness is built from sleep, practice load and recent match stress."
+        eyebrow="Secondary signal"
+        title="Condition"
+        subtitle="Sleep, practice load and match stress. Used to explain variance in the profile, not to score you."
+        action={
+          <Button variant="ghost" onClick={() => navigate('/analyze')}>
+            <Dna />
+            Competitive DNA
+          </Button>
+        }
       />
+
+      <HudPanel className="p-5">
+        <p className="text-body-m text-ink-muted">
+          Readiness is not a headline number in Outplay. A tired week shows up as movement in{' '}
+          <span className="text-ink">consistency</span> and{' '}
+          <span className="text-ink">pressure performance</span>, and this screen exists to say
+          which of those a dip is attributable to — it does not rank you.
+        </p>
+      </HudPanel>
 
       <div className="grid gap-4 xl:grid-cols-[22rem_1fr]">
         <Reveal>
@@ -41,7 +72,7 @@ export default function Wellness() {
               <span className="font-display text-display-xl font-bold text-ink">
                 <AnimatedNumber value={readiness.score} />
               </span>
-              <span className="hud-label text-ink-muted">Readiness</span>
+              <span className="hud-label text-ink-muted">Condition</span>
             </Gauge>
             <p className="mt-4 text-center text-body-l text-ink">{readiness.reason}</p>
             <div className="mt-3 flex items-center gap-3">
@@ -110,7 +141,15 @@ export default function Wellness() {
 
       {/* Inputs -------------------------------------------------------------- */}
       <section>
-        <HudSection eyebrow="Inputs" title="What feeds the score" />
+        <HudSection
+          eyebrow="Inputs"
+          title="What each signal explains"
+          action={
+            <span className="text-body-s text-ink-muted">
+              Mapped to the dimension it is used to account for
+            </span>
+          }
+        />
         <div className="grid gap-4 lg:grid-cols-3">
           {readiness.factors.map((factor, i) => (
             <Reveal key={factor.label} delay={i * 80}>
@@ -135,6 +174,12 @@ export default function Wellness() {
                     ? 'Above your sustainable range this week.'
                     : 'Within your usual range.'}
                 </p>
+                <p className="mt-3 border-t border-line pt-3 text-body-s text-ink-muted">
+                  Read against{' '}
+                  <span className="text-signal">
+                    {dimensionOf('player', factor.explains)?.label ?? factor.label}
+                  </span>
+                </p>
               </HudPanel>
             </Reveal>
           ))}
@@ -149,7 +194,7 @@ export default function Wellness() {
             { label: 'Average sleep', value: `${avgSleep.toFixed(1)}h` },
             { label: 'Best day', value: `${best.day} · ${best.score}` },
             { label: 'Toughest day', value: `${worst.day} · ${worst.score}` },
-            { label: 'Matches played', value: '11' },
+            { label: 'Matches analysed', value: '11' },
           ].map((stat, i) => (
             <Reveal key={stat.label} delay={i * 70}>
               <HudPanel className="p-4">

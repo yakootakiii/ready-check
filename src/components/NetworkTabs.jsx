@@ -1,14 +1,22 @@
 import { NavLink } from 'react-router-dom'
-import { Building, School, Users } from './icons'
+import { Building, School, Sparkle, Target, Users } from './icons'
 
 const TABS = [
-  { to: '/league', label: 'Teams', icon: Users, end: true },
-  { to: '/league/schools', label: 'Schools', icon: School },
-  { to: '/league/orgs', label: 'Organizations', icon: Building },
+  { to: '/network', label: 'Players', icon: Users, end: true },
+  { to: '/network/teams', label: 'Teams', icon: Target },
+  { to: '/network/schools', label: 'Schools', icon: School },
+  { to: '/network/orgs', label: 'Organizations', icon: Building },
+  { to: '/network/talent', label: 'Talent', icon: Sparkle },
 ]
 
-/** The League module's top-level switch, shared by every screen under it. */
-export default function LeagueTabs() {
+/**
+ * The Network module's top-level switch, shared by every screen under it.
+ *
+ * Players first: the ecosystem is a graph of competitors, and the other four
+ * tabs are ways of grouping them. Talent sits last because it is the one tab
+ * that asks a question of the graph rather than listing it.
+ */
+export default function NetworkTabs() {
   return (
     <div className="mb-6 flex flex-wrap gap-2">
       {TABS.map((tab) => (

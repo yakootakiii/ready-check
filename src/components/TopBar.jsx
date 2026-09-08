@@ -5,16 +5,16 @@ import { useGame } from '../gameContext'
 import { GAMES_BY_ID } from '../data/games'
 import { liveMatchesFor } from '../data/generate'
 import { Bell, Menu } from './icons'
+import { LivePip } from './hud'
 import GameSwitcher from './GameSwitcher'
 import { formatClock } from '../format'
 
 const TOP_LINKS = [
   { to: '/', label: 'Home', end: true },
-  { to: '/overview', label: 'Overview' },
-  { to: '/prep/scrims', label: 'Prep', match: '/prep' },
-  { to: '/compete/live', label: 'Compete', match: '/compete' },
-  { to: '/league', label: 'League', match: '/league' },
-  { to: '/recruit/card', label: 'Recruit', match: '/recruit' },
+  { to: '/analyze', label: 'Analyze', match: '/analyze' },
+  { to: '/matchup', label: 'Matchup', match: '/matchup' },
+  { to: '/compete/matches', label: 'Compete', match: '/compete' },
+  { to: '/network', label: 'Network', match: '/network' },
 ]
 
 export default function TopBar({ onToggleRail, railCollapsed = false }) {
@@ -42,8 +42,14 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
           />
         </button>
 
-        <NavLink to="/" className="font-display text-display-m font-bold tracking-wide text-ink">
-          Ready Check
+        {/* The wordmark is set in caps and tracked tight: it is the one place
+            besides the home hero where the brand shouts, and it has to hold
+            its own beside a rail of twelve labels. */}
+        <NavLink
+          to="/"
+          className="font-display text-display-m font-bold uppercase tracking-[0.12em] text-ink"
+        >
+          Outplay
         </NavLink>
 
         <nav aria-label="Modules" className="ml-4 hidden items-center gap-1 lg:flex">
@@ -77,8 +83,8 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
             />
           </button>
           <NavLink
-            to="/recruit/card"
-            aria-label={`Profile, ${player.fullName}`}
+            to="/passport"
+            aria-label={`Competitive passport, ${player.fullName}`}
             className="flex h-8 w-8 items-center justify-center rounded-base border border-line bg-raised font-display text-body-m font-semibold text-ink"
           >
             KR
@@ -87,19 +93,19 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
       </div>
 
       {/* The one place a live match persists no matter which module you are in
-          (spec §4). Slides in once on state change; the border settles after a
-          few pulses rather than staying distracting. */}
+          Slides in once on state change and then sits quiet - a strip that
+          kept pulsing for the next two hours of play would be noise. */}
       {isLive && (
         <div className="animate-live-strip-in border-t border-line bg-base px-4 py-1.5 md:p-0">
           {/* A persistent pill on mobile, a full-width strip from md up
               (spec §8). */}
           <button
             type="button"
-            onClick={() => navigate('/compete/live')}
+            onClick={() => navigate('/compete/matches')}
             className="flex w-full items-center gap-3 rounded-full border border-line bg-surface px-3 py-1.5 text-left transition-colors duration-100 hover:bg-raised md:rounded-none md:border-0 md:px-4"
           >
-            <span className="flex shrink-0 items-center gap-2 text-body-s font-medium text-signal">
-              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-signal" />
+            <span className="flex shrink-0 items-center gap-2 text-body-s font-medium text-ember">
+              <LivePip />
               Live
             </span>
             <span className="font-mono text-mono-m text-ink">

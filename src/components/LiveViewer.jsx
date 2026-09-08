@@ -1,7 +1,6 @@
 import GameTile from './GameTile'
 import AngularPanel from './AngularPanel'
 import { HudLabel, LivePip } from './hud'
-import { Button } from './ui'
 import { Broadcast, Play } from './icons'
 import { useTickingClock } from '../hooks'
 import { formatClock } from '../format'

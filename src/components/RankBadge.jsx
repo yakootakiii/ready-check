@@ -24,17 +24,3 @@ export default function RankBadge({ tier, size = 'm', className = '' }) {
     </AngularPanel>
   )
 }
-
-/**
- * The scannable, non-hero form: a colored dot plus the label. Used in dense
- * list rows where the angular frame would be noise (spec §5.2).
- */
-export function RankDot({ tier, className = '' }) {
-  const t = tierOf(tier)
-  return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${t.bg}`} />
-      <span className={`text-body-m ${t.text}`}>{t.label}</span>
-    </span>
-  )
-}
