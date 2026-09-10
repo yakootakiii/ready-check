@@ -128,6 +128,31 @@ const memo = (key, build) => {
 
 const clamp = (n, lo = 18, hi = 97) => Math.max(lo, Math.min(hi, Math.round(n)))
 
+/**
+ * Fit a freshly generated value into the model's range.
+ *
+ * Hard clipping is the obvious way and the wrong one. Strong competitors
+ * generate raw values well past the ceiling, so several of their dimensions
+ * pin at the same number and the profile stops telling the best teams apart —
+ * which is exactly where a scouting read needs the most resolution. Compressing
+ * the tails preserves ordering while keeping the top of the range open.
+ *
+ * Only for building a profile. `dnaHistory` walks backwards through values that
+ * have already been shaped, and compressing them again at every step would drag
+ * the whole history toward the soft band and invent a downward trend.
+ */
+const SOFT_HIGH = 78
+const SOFT_LOW = 32
+
+const shape = (n) =>
+  clamp(
+    n > SOFT_HIGH
+      ? SOFT_HIGH + (n - SOFT_HIGH) * 0.45
+      : n < SOFT_LOW
+        ? SOFT_LOW - (SOFT_LOW - n) * 0.45
+        : n,
+  )
+
 /* --- Role and genre bias -------------------------------------------------- */
 
 /**
@@ -224,13 +249,13 @@ function buildValues({ kind, seed, strength, biases }) {
     // A wide jitter band on purpose: a profile whose points all sit within a
     // few units of each other is a circle, and a circle says nothing.
     const jitter = (rand() - 0.5) * 34
-    values[dim.key] = clamp(base + bias + jitter)
+    values[dim.key] = shape(base + bias + jitter)
   }
 
   // Role reliance runs the other way: a strong, deep roster depends less on
   // any one seat, so strength should pull it down rather than up.
   if (values.roleReliance !== undefined) {
-    values.roleReliance = clamp(88 - strength * 34 + (rand() - 0.5) * 20)
+    values.roleReliance = shape(88 - strength * 34 + (rand() - 0.5) * 20)
   }
   return values
 }

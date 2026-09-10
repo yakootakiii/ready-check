@@ -77,14 +77,14 @@ product makes about itself.
 | `/matchup/opponents` | `pages/Opponents.jsx` | Scouting list, ordered by how awkward each side is for you rather than by rating. |
 | `/matchup/opponents/:teamId` | ″ | One opponent: their shape against yours, tactical tendencies, head-to-head, roster. |
 | `/compete/matches` | `pages/MatchCentre.jsx` | Live viewer or next fixture, plus the pre-match brief, setup check and comms. |
-| `/compete/tournaments` | `pages/Tournaments.jsx` | Title picker → a title's circuit → one event's draw. |
+| `/compete/tournaments` | `pages/Tournaments.jsx` | Title picker → a title's circuit → one event's draw, with your route through it and whether the model called each round. |
 | `/compete/scrims` | `pages/Scrims.jsx` | Scrim finder ordered by **style match to your next opponent**, not by rank. |
 | `/compete/setup` | `pages/SetupCheck.jsx` | Platform-aware hardware and connection checks. |
 | `/network` | `pages/NetworkPlayers.jsx` | Players, listed with their competitive identity and trajectory beside the rating. |
 | `/network/teams` | `pages/NetworkTeams.jsx` | Every team; `/network/teams/:teamId` is the team page. |
 | `/network/schools` | `pages/NetworkBackers.jsx` | Schools with an active roster; `/network/orgs` is the same screen with `kind="company"`. |
 | `/network/talent` | `pages/Talent.jsx` | Talent intelligence: roster gaps, candidates ranked by fit, emerging talent, and the same model run in reverse. |
-| `/passport` | `pages/Passport.jsx` | The player's own passport; `/passport/:playerId` renders anyone found through the Network. |
+| `/passport` | `pages/Passport.jsx` | The player's own passport; `/passport/:playerId` renders anyone found through the Network, assembled from the graph — their team's record, form, roster, placements and fixtures — rather than padded out with invented fields. |
 
 `Tournaments.jsx` holds all three levels and branches on `useParams()`.
 `NetworkBackers.jsx` serves schools and companies from one `KINDS` map.
@@ -110,7 +110,19 @@ compact surfaces. Key exports: `playerDna`, `teamDna`, `dimensionsFor`,
 `coreDimensionsFor`, `orderedDimensions`, `identityFor`, `traitsFor`,
 `dnaHistory`, `deltasFrom`, `roleArchetype`.
 
-Three things to know before touching it:
+Four things to know before touching it:
+
+- **`shape()` compresses the tails; `clamp()` does not.** Fresh values go
+  through `shape`, because strong competitors generate raw numbers past the
+  ceiling and hard clipping pinned about 5% of all dimensions — and four of the
+  top team's twelve — at the same 97, which is where a scouting read needs the
+  most resolution. `dnaHistory` walks backwards through values that are already
+  shaped and uses the plain `clamp`: compressing them again at every step would
+  drag the whole history toward the soft band and invent a downward trend.
+  Note that levels are deliberately close (about 11 points of mean separates the
+  strongest team in a scene from the weakest). **That is correct.** A wide level
+  gap would make radar *area* read as quality, and a DNA is a profile, not a
+  score — the competitors are meant to differ in shape.
 
 - **`INVERTED_DIMENSIONS`.** Role reliance is the one dimension where high is
   worse. Anything that ranks, colours or compares dimensions must go through
@@ -149,6 +161,22 @@ product is that the matchup falls out of the two models.
   objective control"), because that is what one match actually reveals.
 - `sparringLikeness` is what makes the scrim finder more than a board: it ranks
   offers by how closely a side's DNA resembles your next opponent's.
+- `bracketPathFor` runs the model forwards over a whole draw rather than one
+  fixture, which is what turns a bracket from a results table into a plan. It
+  returns `null` for solo titles, whose draws come from the player pool and
+  contain no roster to have a team profile.
+- `headToHeadFor` is the history between two specific sides. Meetings already
+  inside the recent window are **reused, not regenerated**, so this and match
+  analysis cannot disagree about the same game. Each older meeting draws its
+  projection *first* and derives the result from it, so a tie the model called
+  at 62% really was won about 62% of the time — generating the result from the
+  current projection and printing a jittered one beside it would show a call
+  that number never made. The oldest meeting predates model coverage and says
+  so, for the same reason coverage is stated everywhere else.
+
+All three accuracy readouts — recent matches, bracket paths and head-to-head —
+land at 60–64% across the whole dataset. They are computed independently, so if
+one of them drifts far from the others, something has decoupled.
 
 ### `src/data/talent.js` — Talent Intelligence
 
@@ -230,12 +258,25 @@ thing it is selling.
 - `src/components/MatchupBars.jsx` — bars growing outward from a shared centre
   line, because the quantity being read is the **gap**. Direction is never left
   to subtraction: `advantage` arrives already signed from the matchup model.
+  The row **reorders** below `sm` (label and gap onto their own line, via a
+  wrapper that becomes `display: contents` at `sm`) rather than hiding the
+  label. It hid it once, and twelve rows of two numbers and a bar with no
+  dimension name attached is unreadable — on the flagship screen.
 - `src/components/InsightCard.jsx` — one thing the system worked out. Tone is the
   classification, not decoration. Every insight carries its source.
 - `src/components/CompetitiveIdentity.jsx` — identity, traits, and
   `ConfidenceMeter`. An identity asserted without a sample size is a horoscope.
 - `src/components/IntelligencePipeline.jsx` — the stack diagram.
-- `src/components/CoverageNote.jsx` — `CoverageBadge` and the full note.
+- `src/components/CoverageNote.jsx` — `CoverageBadge` and the full note. The
+  badge is also on every row of the `GameSwitcher`: the picker is the one place
+  a reader *chooses* the scope, and finding out on the next screen that the
+  title you just selected has no behavioural model is the surprise the grading
+  exists to prevent.
+- `src/components/HeadToHead.jsx` — prior meetings, with the drift line as the
+  point rather than a footnote. A raw head-to-head record is the most
+  confidently misread number in sport; three wins over a side that has since
+  rebuilt its tempo says very little, and this is the one surface that can say
+  so.
 
 ### Other components
 
@@ -247,7 +288,10 @@ thing it is selling.
   clip-path. Never put that class on an element directly.
 - `src/components/PlayerCard.jsx` — the passport card, used by `/passport` and by
   Talent. **Identity leads; rank is one chip among the supporting numbers.** That
-  ordering is the whole difference from the old "my card".
+  ordering is the whole difference from the old "my card". Unknown fields are
+  dropped rather than rendered as a dash (`extraStats` fills the gap with
+  something the platform does know), because a blank tile claims a field exists
+  and is empty rather than that it was never collected.
 - `src/components/NetworkTabs.jsx` — Players / Teams / Schools / Organizations /
   Talent, shared by every screen under `/network`.
 - Also: `GameTile`, `LiveViewer`, `Reveal`, `Sidebar`, `MobileTabBar`,
@@ -277,7 +321,11 @@ reused by `NetworkBackers.jsx` and `Passport.jsx`.
 - `src/data/generate.js` — **the only source of scene-shaped data.** `teamsFor`,
   `playersFor`, `liveMatchesFor`, `openScrimsFor`, `eventsFor`, `bracketFor`,
   `activityFor`, `circuitSummaryFor`, `findPlayer`, and `acrossGames` for the
-  all-titles view. Everything derives deterministically
+  all-titles view. **`bracketFor` weights its results by entrant strength**, not
+  by a coin flip — a draw whose winners ignore the standings contradicts both
+  the table and the matchup model that reads off it, and the path panel then
+  reports the model missing almost every round. Across all 72 draws the model
+  now calls about 64%, in line with `modelAccuracyFor`. Everything derives deterministically
   from a seed built out of the game id and is memoised. **Seeds must stay
   stable** — a leaderboard that reshuffles between renders reads as broken.
 - `src/data/mock.js` — the signed-in player, their per-title profiles, verified

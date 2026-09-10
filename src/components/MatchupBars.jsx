@@ -35,17 +35,35 @@ export default function MatchupBars({
         <HudLabel className="text-ember">{themLabel}</HudLabel>
       </div>
 
-      <ul className="space-y-2.5">
+      <ul className="space-y-3.5 sm:space-y-2.5">
         {dimensions.map((dim, i) => {
           const favour = FAVOUR[dim.favour]
           const gap = Math.round(dim.advantage)
           return (
-            <li key={dim.key} className="flex items-center gap-3">
-              <span className="w-9 shrink-0 text-right font-mono text-mono-m text-ink">
+            <li key={dim.key} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              {/* Narrow widths get the label and the gap on their own line
+                  above the bar; from `sm` up the wrapper becomes `contents` and
+                  its two children drop into the single row, ordered after the
+                  numbers. Reordering rather than hiding matters here: a row of
+                  two numbers and a bar with no dimension name attached is
+                  unreadable, and this is the product's flagship screen. */}
+              <span className="order-1 flex w-full items-baseline justify-between gap-3 sm:contents">
+                <span className="min-w-0 truncate text-body-s text-ink-muted sm:order-4 sm:w-28 sm:shrink-0 sm:text-right">
+                  {dim.label}
+                </span>
+                <span
+                  className={`shrink-0 font-mono text-body-s ${favour.text} sm:order-5 sm:w-11 sm:text-right`}
+                >
+                  {gap > 0 ? '+' : gap < 0 ? '−' : '±'}
+                  {Math.abs(gap)}
+                </span>
+              </span>
+
+              <span className="order-2 w-9 shrink-0 text-right font-mono text-mono-m text-ink sm:order-1">
                 {dim.you}
               </span>
 
-              <div className="flex min-w-0 flex-1 items-center">
+              <div className="order-3 flex min-w-0 flex-1 items-center sm:order-2">
                 <div className="flex h-2 flex-1 justify-end overflow-hidden rounded-l-full bg-raised">
                   <div
                     className="animate-bar-left h-full rounded-l-full bg-signal"
@@ -61,14 +79,8 @@ export default function MatchupBars({
                 </div>
               </div>
 
-              <span className="w-9 shrink-0 font-mono text-mono-m text-ink">{dim.them}</span>
-
-              <span className="hidden w-28 shrink-0 text-right sm:block">
-                <span className="text-body-s text-ink-muted">{dim.label}</span>
-              </span>
-              <span className={`w-11 shrink-0 text-right font-mono text-body-s ${favour.text}`}>
-                {gap > 0 ? '+' : gap < 0 ? '−' : '±'}
-                {Math.abs(gap)}
+              <span className="order-4 w-9 shrink-0 font-mono text-mono-m text-ink sm:order-3">
+                {dim.them}
               </span>
             </li>
           )

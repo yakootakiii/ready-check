@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { GAMES, PLATFORMS, genreOf } from '../data/games'
+import { COVERAGE, GAMES, PLATFORMS, coverageKeyOf, genreOf } from '../data/games'
 import { activityFor } from '../data/generate'
 import { useGame } from '../gameContext'
 import GameTile from './GameTile'
+import { CoverageBadge } from './CoverageNote'
 import { Search } from './icons'
 
 /**
  * The title picker. It lives in the top bar because the selected game scopes
  * every module, so it has to be reachable from all of them.
+ *
+ * Every row states its model coverage. Coverage is declared on every screen
+ * whose content depends on it, and the picker is the one place a reader
+ * *chooses* that scope — finding out on the next screen that the title you just
+ * selected has no behavioural model is exactly the surprise the coverage
+ * grading exists to prevent.
  */
 export default function GameSwitcher() {
   const { gameId, setGameId, game, isAll } = useGame()
@@ -42,6 +49,7 @@ export default function GameSwitcher() {
         g.name.toLowerCase().includes(q) ||
         g.short.toLowerCase().includes(q) ||
         genreOf(g).label.toLowerCase().includes(q) ||
+        COVERAGE[coverageKeyOf(g)].label.toLowerCase().includes(q) ||
         g.regions.some((r) => r.toLowerCase().includes(q)),
     )
     return PLATFORMS.map((platform) => ({
@@ -49,6 +57,10 @@ export default function GameSwitcher() {
       games: matches.filter((g) => g.platform === platform),
     })).filter((group) => group.games.length > 0)
   }, [query])
+
+  // Ecosystem coverage is every title; behavioural coverage is not, and the
+  // picker says which is which rather than implying they are the same.
+  const modelledCount = GAMES.filter((g) => coverageKeyOf(g) !== 'planned').length
 
   const choose = (id) => {
     setGameId(id)
@@ -97,7 +109,7 @@ export default function GameSwitcher() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search title, genre or region"
+              placeholder="Search title, genre, region or coverage"
               className="w-full bg-transparent text-body-m text-ink placeholder:text-ink-muted focus:outline-none"
             />
           </label>
@@ -119,7 +131,7 @@ export default function GameSwitcher() {
             <span className="flex-1">
               <span className="block text-body-m text-ink">All games</span>
               <span className="block text-body-s text-ink-muted">
-                Everything across {GAMES.length} titles
+                Everything across {GAMES.length} titles · {modelledCount} modelled
               </span>
             </span>
             {isAll && <span className="text-signal">●</span>}
@@ -143,17 +155,11 @@ export default function GameSwitcher() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-body-m text-ink">{g.name}</span>
                       <span className={`block text-body-s ${genre.text}`}>
-                        {genre.label} · {g.teamSize === 1 ? 'Solo' : `${g.teamSize}v${g.teamSize}`}
+                        {genre.label} · {g.teamSize === 1 ? 'Solo' : `${g.teamSize}v${g.teamSize}`} ·{' '}
+                        <span className="font-mono text-ink-muted">{activity.live} live</span>
                       </span>
                     </span>
-                    <span className="shrink-0 text-right">
-                      <span className="block font-mono text-body-s text-ember">
-                        {activity.live} live
-                      </span>
-                      <span className="block font-mono text-body-s text-ink-muted">
-                        {activity.scrims} scrims
-                      </span>
-                    </span>
+                    <CoverageBadge game={g} className="shrink-0" />
                     {selected && <span className="text-signal">●</span>}
                   </button>
                 )

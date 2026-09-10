@@ -29,6 +29,9 @@ const ROUTES = [
   '/compete/tournaments',
   '/compete/tournaments/mlbb',
   '/compete/tournaments/mlbb/mlbb-e0',
+  // A solo title's draw comes from the player pool, so the path panel has to
+  // render nothing rather than crash looking for a roster in it.
+  '/compete/tournaments/sf6/sf6-e0',
   '/compete/scrims',
   '/compete/setup',
   '/network',

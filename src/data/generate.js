@@ -319,8 +319,23 @@ export function bracketFor(gameId, eventId) {
     const entrants = pick(pool, 8, rand)
     const best = game.unit === 'Match' ? 3 : 2
 
+    // How likely an entrant is to win, from the same numbers the rest of the
+    // app reads: a team's record, a solo competitor's rating.
+    const strengthOf = (entrant) => {
+      if (entrant.record) {
+        const [w, l] = entrant.record.split('-').map(Number)
+        return w + l ? w / (w + l) : 0.5
+      }
+      return Math.min(1, Math.max(0, ((entrant.rating ?? 2000) - 1750) / 750))
+    }
+
     const play = (a, b, decided) => {
-      const aWins = rand() > 0.45
+      // Upsets still happen, but the stronger side wins more often than not.
+      // A coin-flip draw contradicts both the standings and the matchup model
+      // that reads off them, and two screens disagreeing about the same
+      // tournament reads as broken rather than as variance.
+      const edge = (strengthOf(a) - strengthOf(b)) * 0.9
+      const aWins = rand() < 0.5 + edge
       const loserScore = Math.floor(rand() * best)
       return {
         a,

@@ -30,6 +30,7 @@ export default function PlayerCard({
   highlights = [],
   orgActions = false,
   trajectory,
+  extraStats = [],
 }) {
   const game = GAMES_BY_ID[profile.gameId]
   const t = tierOf(profile.tier)
@@ -111,8 +112,15 @@ export default function PlayerCard({
           { label: 'Matches analysed', value: profile.matchesAnalyzed },
           // Headline stats are whatever this scene actually quotes.
           ...profile.stats,
-          { label: 'Availability', value: profile.availability },
-        ].map((stat) => (
+          // Dropped rather than shown as an em dash when it is not known. A
+          // passport for a player found through the Network has no
+          // availability on it, and a blank tile claims the field exists and
+          // is empty rather than that it was never collected.
+          profile.availability ? { label: 'Availability', value: profile.availability } : null,
+          ...extraStats,
+        ]
+          .filter(Boolean)
+          .map((stat) => (
           <div key={stat.label} className="rounded-base border border-line bg-raised/60 p-3">
             <HudLabel>{stat.label}</HudLabel>
             <div className="mt-1.5 font-mono text-mono-m text-ink">{stat.value}</div>

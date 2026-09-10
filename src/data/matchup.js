@@ -27,7 +27,7 @@
  * generic chatbot paragraph bolted onto a stat table.
  */
 import { GAMES_BY_ID, lexiconOf } from './games'
-import { teamsFor } from './generate'
+import { bracketFor, eventsFor, teamsFor } from './generate'
 import { INVERTED_DIMENSIONS, TEAM_DIMENSIONS, teamDna } from './dna'
 
 /* --- Seeded helpers ------------------------------------------------------- */
@@ -534,5 +534,179 @@ export function sparringLikeness(gameId, teamName) {
     // two teams in one scene get, so that is where the scale bottoms out.
     const similarity = Math.max(0, Math.round(100 - (distance / 30) * 100))
     return { team, target: target.opponent, distance: Math.round(distance), similarity }
+  })
+}
+
+/* --- Reading a draw ------------------------------------------------------- */
+
+/**
+ * Your route through one tournament's bracket.
+ *
+ * A bracket already knows who you can meet in every round, which makes it the
+ * one place in the app where matchup intelligence can be run forwards over a
+ * whole event rather than one fixture at a time. That turns a draw from a
+ * results table into a plan: which round is the wall, and where the model
+ * thinks the run ends.
+ *
+ * Completed legs carry `called` — whether the model's projection matched what
+ * actually happened. A path that only projected forwards and never marked its
+ * own misses would be the half of the loop this product exists to avoid.
+ *
+ * Returns `null` when there is no roster in the draw at all, which is the case
+ * for solo titles: those brackets are drawn from the player pool, and a team
+ * profile has nothing to say about them.
+ */
+export function bracketPathFor(gameId, eventId) {
+  return memo(`path:${gameId}:${eventId}`, () => {
+    const rounds = bracketFor(gameId, eventId)
+    const me = myTeam(gameId)
+    const mine = myDna(gameId)
+
+    const legs = []
+    for (const round of rounds) {
+      // Winners carry through as the same entrant object, so the same identity
+      // check finds you in every round you survived.
+      const match = round.matches.find((m) => m.a.id === me.id || m.b.id === me.id)
+      if (!match) break
+
+      const isA = match.a.id === me.id
+      const opponent = isA ? match.b : match.a
+      const score = isA ? [match.score[0], match.score[1]] : [match.score[1], match.score[0]]
+      const won = match.done ? match.winner.id === me.id : null
+      const matchup = matchupFor(mine, teamDna(opponent))
+
+      legs.push({
+        id: match.id,
+        round: round.round,
+        opponent,
+        dna: teamDna(opponent),
+        matchup,
+        result: match.done ? (won ? 'won' : 'lost') : 'upcoming',
+        score,
+        called: match.done ? (matchup.projection.winPct >= 50) === won : null,
+      })
+
+      if (match.done && !won) break
+    }
+
+    if (legs.length === 0) return null
+
+    const played = legs.filter((leg) => leg.result !== 'upcoming')
+    const last = legs[legs.length - 1]
+
+    return {
+      team: me,
+      legs,
+      status: last.result === 'lost' ? 'eliminated' : 'alive',
+      eliminatedIn: last.result === 'lost' ? last : null,
+      next: last.result === 'upcoming' ? last : null,
+      // The wall: the round the model likes you least in. Worth naming even
+      // when it is already behind you, because it is where the prep should
+      // have gone.
+      hardest: legs.reduce((worst, leg) =>
+        leg.matchup.projection.winPct < worst.matchup.projection.winPct ? leg : worst,
+      ),
+      called: played.filter((leg) => leg.called).length,
+      played: played.length,
+    }
+  })
+}
+
+/* --- Prior meetings ------------------------------------------------------- */
+
+const H2H_WINDOWS = ['Last split', 'Two splits ago', 'Last season', 'Preseason']
+
+/**
+ * What has actually happened when these two have met.
+ *
+ * A style model that never looked at the history between two specific sides
+ * would be leaving the most direct evidence there is on the floor. This is
+ * also where the learning loop becomes legible over more than one match: the
+ * record, how many of those meetings the model called, and how far the
+ * opponent's profile has drifted since the first of them.
+ *
+ * Any meeting already inside the recent window is **reused**, not regenerated,
+ * so this screen and match analysis cannot disagree about the same game. The
+ * oldest meeting predates the model on this pairing and says so — coverage is
+ * stated everywhere else, and a head-to-head that silently back-filled
+ * predictions it never made would undo that.
+ */
+export function headToHeadFor(gameId, opponentId) {
+  return memo(`h2h:${gameId}:${opponentId}`, () => {
+    const me = myTeam(gameId)
+    const opponent = teamsFor(gameId).find((team) => team.id === opponentId)
+    if (!opponent || opponent.id === me.id) return null
+
+    const game = GAMES_BY_ID[gameId]
+    const mine = myDna(gameId)
+    const theirs = teamDna(opponent)
+    const matchup = matchupFor(mine, theirs)
+    const best = game.teamSize === 1 ? 3 : 2
+    const rand = rng(seedFrom('h2h', me.id, opponentId))
+
+    const fromRecent = recentMatchesFor(gameId)
+      .filter((match) => match.opponent.id === opponentId)
+      .map((match) => ({
+        id: match.id,
+        when: match.played,
+        event: match.kind,
+        won: match.won,
+        score: match.score,
+        projected: match.matchup.projection.winPct,
+        modelled: true,
+        discovery: match.debrief.discovery.text,
+      }))
+
+    const events = eventsFor(gameId)
+    const olderCount = 2 + Math.floor(rand() * 2)
+    const older = Array.from({ length: olderCount }, (_, i) => {
+      // The last one on the list is the earliest, and is old enough to predate
+      // the model covering this pairing at all.
+      const modelled = i < olderCount - 1
+      // The projection is drawn first and the result follows from it, so a
+      // meeting the model called at 62% really was won about 62% of the time.
+      // Generating the result from the *current* projection and then showing a
+      // jittered one beside it would print a call the number never made, and
+      // the head-to-head accuracy underneath would be meaningless.
+      const projected = modelled
+        ? Math.max(8, Math.min(92, Math.round(matchup.projection.winPct + (rand() - 0.5) * 22)))
+        : null
+      const won = rand() < (projected ?? matchup.projection.winPct) / 100
+      return {
+        id: `${me.id}-h2h-${opponentId}-${i}`,
+        when: H2H_WINDOWS[i % H2H_WINDOWS.length],
+        event: events[(i + 1) % events.length].name,
+        won,
+        score: won ? [best, Math.floor(rand() * best)] : [Math.floor(rand() * best), best],
+        projected,
+        modelled,
+        discovery: null,
+      }
+    })
+
+    const meetings = [...fromRecent, ...older]
+    const graded = meetings.filter((meeting) => meeting.modelled)
+
+    // How far the opponent has moved since the first time you played them -
+    // the reason an old head-to-head record can mislead on its own.
+    const then = theirs.history[0].values
+    const drifted = theirs.ordered
+      .map((dim) => ({ ...dim, shift: theirs.values[dim.key] - then[dim.key] }))
+      .sort((a, b) => Math.abs(b.shift) - Math.abs(a.shift))[0]
+
+    return {
+      opponent,
+      dna: theirs,
+      matchup,
+      meetings,
+      record: {
+        won: meetings.filter((m) => m.won).length,
+        lost: meetings.filter((m) => !m.won).length,
+      },
+      called: graded.filter((m) => (m.projected >= 50) === m.won).length,
+      graded: graded.length,
+      drifted,
+      discovery: fromRecent.find((m) => m.discovery)?.discovery ?? null,
+    }
   })
 }

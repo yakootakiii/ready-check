@@ -5,6 +5,7 @@ import Reveal from '../components/Reveal'
 import DnaRadar, { RadarLegend } from '../components/DnaRadar'
 import DnaDimensions, { DnaStrip } from '../components/DnaDimensions'
 import MatchupBars from '../components/MatchupBars'
+import HeadToHead from '../components/HeadToHead'
 import CompetitiveIdentity from '../components/CompetitiveIdentity'
 import CoverageNote from '../components/CoverageNote'
 import { InsightBullet } from '../components/InsightCard'
@@ -14,7 +15,7 @@ import { ArrowRight, Search, Target } from '../components/icons'
 import { useGame } from '../gameContext'
 import { GAMES_BY_ID } from '../data/games'
 import { TEAM_DIMENSIONS, teamDna } from '../data/dna'
-import { matchupFor, myDna, MY_TEAM_INDEX } from '../data/matchup'
+import { headToHeadFor, matchupFor, myDna, MY_TEAM_INDEX } from '../data/matchup'
 import { findTeam, teamProfile } from '../data/league'
 import { teamsFor } from '../data/generate'
 import { player } from '../data/mock'
@@ -50,6 +51,7 @@ function OpponentProfile({ team, onBack }) {
   const theirs = teamDna(team)
   const m = matchupFor(mine, theirs)
   const profile = teamProfile(team)
+  const h2h = headToHeadFor(team.gameId, team.id)
 
   const series = [
     { key: 'them', label: team.name, values: theirs.values, tone: 'ember' },
@@ -135,15 +137,22 @@ function OpponentProfile({ team, onBack }) {
 
       <section>
         <HudSection eyebrow="Head to head" title={`${mine.name} against ${team.name}`} />
-        <Reveal>
-          <HudPanel className="p-6">
-            <MatchupBars
-              dimensions={m.dimensions}
-              youLabel={mine.name}
-              themLabel={team.name}
-            />
-          </HudPanel>
-        </Reveal>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Reveal>
+            <HudPanel className="h-full p-6">
+              <MatchupBars
+                dimensions={m.dimensions}
+                youLabel={mine.name}
+                themLabel={team.name}
+              />
+            </HudPanel>
+          </Reveal>
+          {h2h && (
+            <Reveal delay={90}>
+              <HeadToHead h2h={h2h} className="h-full" />
+            </Reveal>
+          )}
+        </div>
       </section>
 
       <div className="grid gap-8 xl:grid-cols-[1fr_1fr]">

@@ -9,16 +9,17 @@ import Sparkline from '../components/Sparkline'
 import CoverageNote from '../components/CoverageNote'
 import { VerifiedChip } from '../components/CompetitiveIdentity'
 import { InsightBullet } from '../components/InsightCard'
-import { HudLabel, HudPageHeader, HudPanel, HudSection } from '../components/hud'
+import { FormRow, HudLabel, HudPageHeader, HudPanel, HudSection } from '../components/hud'
 import { Button } from '../components/ui'
-import { ArrowRight, Dna, Shield, Trend } from '../components/icons'
+import { ArrowRight, Dna, Radar, Shield, Target, Trend } from '../components/icons'
 import { useGame } from '../gameContext'
 import { GAMES_BY_ID, genreOf } from '../data/games'
 import { PLAYER_DIMENSIONS, coreDimensionsFor, playerDna } from '../data/dna'
 import { trajectoryFor } from '../data/talent'
-import { findPlayer, teamsFor } from '../data/generate'
+import { findPlayer, playersFor, teamsFor } from '../data/generate'
+import { teamProfile } from '../data/league'
 import { achievementsFor, highlightVods, player, playerEntityFor, profileFor, teamHistoryFor } from '../data/mock'
-import { placementTone } from './NetworkTeams'
+import { AccoladeRow, placementTone } from './NetworkTeams'
 import { tier as tierOf } from '../tiers'
 
 /**
@@ -55,9 +56,16 @@ function VisitedPassport({ entry, onBack }) {
   const dna = playerDna(entry)
   const trajectory = trajectoryFor(dna)
 
-  // A ladder row is not a full person record, so the passport shown for one is
-  // assembled from what the platform actually knows rather than padded out
-  // with fields it would have to invent.
+  // A ladder row is not a full person record, but the platform knows more
+  // about them than the row itself carries: they play for a team, and that
+  // team has a region, a record, a form line and a shelf of placements. So the
+  // passport is assembled from the graph rather than padded out with fields it
+  // would have to invent — and anything genuinely unknown (availability) is
+  // left off instead of rendered as a dash.
+  const team = teamsFor(entry.gameId).find((row) => row.name === entry.team)
+  const roster = team ? teamProfile(team) : null
+  const ladderRank = playersFor(entry.gameId).findIndex((row) => row.id === entry.id) + 1
+
   const asPlayer = {
     fullName: entry.name,
     handle: entry.name,
@@ -68,9 +76,9 @@ function VisitedPassport({ entry, onBack }) {
     role: entry.role,
     tier: entry.tier,
     rating: entry.rating,
-    region: game.regions[0],
-    availability: 'On a roster',
-    winRate: '—',
+    region: team?.region ?? game.regions[0],
+    availability: null,
+    winRate: roster ? `${roster.winRate}%` : '—',
     matchesAnalyzed: dna.sample,
     stats: entry.stats,
   }
@@ -100,10 +108,136 @@ function VisitedPassport({ entry, onBack }) {
           dna={dna}
           trajectory={trajectory}
           orgActions
+          extraStats={[{ label: `${game.short} ladder`, value: `#${ladderRank}` }]}
         />
       </Reveal>
 
       <DnaSection dna={dna} />
+
+      {/* What the graph knows about them ---------------------------------- */}
+      {roster && (
+        <div className="grid gap-8 xl:grid-cols-[1fr_1fr]">
+          <section>
+            <HudSection
+              eyebrow="Current team"
+              title={roster.name}
+              action={
+                <Button variant="ghost" onClick={() => navigate(`/network/teams/${roster.id}`)}>
+                  Team page
+                  <ArrowRight />
+                </Button>
+              }
+            />
+            <Reveal>
+              <HudPanel className="p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="font-display text-display-m font-semibold text-ink">
+                      {roster.winRate}% win rate
+                    </div>
+                    <div className="mt-1 text-body-s">
+                      <span className={tierOf(roster.tier).text}>
+                        {tierOf(roster.tier).label}
+                      </span>
+                      <span className="text-ink-muted">
+                        {' '}
+                        · {roster.region} · {roster.record}
+                      </span>
+                    </div>
+                  </div>
+                  <FormRow form={roster.form} />
+                </div>
+
+                <div className="mt-5 border-t border-line pt-4">
+                  <HudLabel className="mb-3">Alongside</HudLabel>
+                  <ul className="space-y-2">
+                    {roster.roster
+                      .filter((member) => member.id !== entry.id)
+                      .map((member) => (
+                        <li key={member.id} className="flex items-center gap-3">
+                          <span className="min-w-0 flex-1 truncate text-body-m text-ink-muted">
+                            {member.name}
+                          </span>
+                          <span className="shrink-0 text-body-s text-ink-muted">
+                            {member.role}
+                          </span>
+                          <span className="w-12 shrink-0 text-right font-mono text-mono-m text-ink">
+                            {member.rating}
+                          </span>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
+                  <Button onClick={() => navigate(`/matchup/opponents/${roster.id}`)}>
+                    <Radar />
+                    Scout this team
+                  </Button>
+                  <Button variant="ghost" onClick={() => navigate('/network/talent')}>
+                    <Target />
+                    Roster fit
+                  </Button>
+                </div>
+              </HudPanel>
+            </Reveal>
+          </section>
+
+          <section>
+            <HudSection
+              eyebrow="Verified record"
+              title={
+                roster.accolades.length
+                  ? `${roster.accolades.length} placements`
+                  : 'No placements yet'
+              }
+              action={
+                <span className="flex items-center gap-2 text-body-s text-ink-muted">
+                  <Shield />
+                  Won with {roster.name}
+                </span>
+              }
+            />
+            <Reveal>
+              <HudPanel className="p-5">
+                {roster.accolades.length ? (
+                  <ul className="divide-y divide-line">
+                    {roster.accolades.map((accolade) => (
+                      <AccoladeRow key={accolade.id} accolade={accolade} />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="py-6 text-center text-body-m text-ink-muted">
+                    Nothing on the shelf yet. The profile above is built from{' '}
+                    {dna.sample} analysed matches regardless — a record is not the only
+                    evidence the model reads.
+                  </p>
+                )}
+
+                <div className="mt-5 border-t border-line pt-4">
+                  <HudLabel>Entered this season</HudLabel>
+                  <ul className="mt-3 space-y-2">
+                    {roster.tournaments.map((event) => (
+                      <li key={event.id} className="flex items-center gap-3">
+                        <span
+                          aria-hidden="true"
+                          className={`h-5 w-1 shrink-0 rounded-full ${
+                            event.status === 'live' ? 'bg-ember' : 'bg-line'
+                          }`}
+                        />
+                        <span className="min-w-0 flex-1 truncate text-body-m text-ink">
+                          {event.name}
+                        </span>
+                        <span className="shrink-0 text-body-s text-ink-muted">{event.stage}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </HudPanel>
+            </Reveal>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

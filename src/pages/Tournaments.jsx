@@ -5,9 +5,10 @@ import LiveViewer from '../components/LiveViewer'
 import Reveal from '../components/Reveal'
 import { HudLabel, HudPageHeader, HudPanel, HudSection, LivePip } from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
-import { ArrowRight, Bracket as BracketIcon, Search } from '../components/icons'
+import { ArrowRight, Bracket as BracketIcon, Radar, Search, Target } from '../components/icons'
 import { GAMES, GAMES_BY_ID, genreOf } from '../data/games'
 import { bracketFor, circuitSummaryFor, eventsFor, liveMatchesFor } from '../data/generate'
+import { bracketPathFor } from '../data/matchup'
 import { formatPrize } from '../format'
 import { tier as tierOf } from '../tiers'
 import { useGame } from '../gameContext'
@@ -275,6 +276,148 @@ function MatchCard({ match, game }) {
   )
 }
 
+/**
+ * Your route through this draw.
+ *
+ * A bracket already knows who you can meet in every round, so it is the one
+ * place matchup intelligence runs forwards over a whole event rather than one
+ * fixture at a time — which turns a results table into a plan: where the wall
+ * is, and where the model thinks the run ends.
+ *
+ * Completed rounds show whether the model actually called them. A path that
+ * projected forwards and never marked its own misses would be the half of the
+ * loop this product exists to avoid.
+ */
+const LEG_TONE = {
+  won: { label: 'Won', text: 'text-edge', rule: 'bg-edge' },
+  lost: { label: 'Lost', text: 'text-ember', rule: 'bg-ember' },
+  upcoming: { label: 'To play', text: 'text-signal', rule: 'bg-signal' },
+}
+
+function EventPath({ game, event }) {
+  const navigate = useNavigate()
+  const path = bracketPathFor(game.id, event.id)
+
+  // Solo titles draw from the player pool, so there is no roster in the draw
+  // and a team profile has nothing to say about it.
+  if (!path) return null
+
+  return (
+    <section>
+      <HudSection
+        eyebrow="Path analysis"
+        title={`${path.team.name}'s route`}
+        action={
+          <span className="text-body-s text-ink-muted">
+            Model called{' '}
+            <span className="font-mono text-mono-m text-ink">
+              {path.called}/{path.played}
+            </span>{' '}
+            of the rounds played
+          </span>
+        }
+      />
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {path.legs.map((leg, i) => {
+          const tone = LEG_TONE[leg.result]
+          const isWall = leg.id === path.hardest.id
+          return (
+            <Reveal key={leg.id} delay={i * 80}>
+              <HudPanel
+                as="button"
+                interactive
+                corners={false}
+                glow={leg.result === 'lost' ? 'ember' : 'signal'}
+                onClick={() => navigate(`/matchup/opponents/${leg.opponent.id}`)}
+                className="flex h-full w-full gap-4 p-5 text-left"
+              >
+                <span aria-hidden="true" className={`w-0.5 shrink-0 rounded-full ${tone.rule}`} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-baseline justify-between gap-2">
+                    <HudLabel>{leg.round}</HudLabel>
+                    <span className={`hud-label ${tone.text}`}>{tone.label}</span>
+                  </span>
+
+                  <span className="mt-2 block truncate font-display text-display-m font-semibold text-ink">
+                    vs. {leg.opponent.name}
+                  </span>
+                  <span className="mt-0.5 block truncate text-body-s text-signal">
+                    {leg.dna.identity}
+                  </span>
+
+                  <span className="mt-4 flex items-baseline justify-between gap-3 border-t border-line pt-3">
+                    <span className="text-body-s text-ink-muted">
+                      Model gave you{' '}
+                      <span className="font-mono text-mono-m text-ink">
+                        {leg.matchup.projection.winPct}%
+                      </span>
+                    </span>
+                    <span className={`font-mono text-mono-m ${tone.text}`}>
+                      {leg.result === 'upcoming' ? `${leg.score.join('–')} live` : leg.score.join('–')}
+                    </span>
+                  </span>
+
+                  {leg.called === false && (
+                    <span className="mt-2 block text-body-s text-ember">
+                      The model called this one wrong. It has been fed back.
+                    </span>
+                  )}
+                  {leg.result === 'upcoming' && leg.matchup.primaryConcern && (
+                    <span className="mt-2 block text-body-s text-ink-muted">
+                      Watch: {leg.matchup.primaryConcern.label.toLowerCase()} — they read{' '}
+                      {leg.matchup.primaryConcern.them} against your{' '}
+                      {leg.matchup.primaryConcern.you}.
+                    </span>
+                  )}
+                  {isWall && path.legs.length > 1 && leg.result !== 'upcoming' && (
+                    <span className="mt-2 block text-body-s text-ink-muted">
+                      The hardest tie of the run on paper.
+                    </span>
+                  )}
+                </span>
+              </HudPanel>
+            </Reveal>
+          )
+        })}
+      </div>
+
+      <Reveal delay={240}>
+        <HudPanel className="mt-3 flex flex-wrap items-center justify-between gap-4 p-5">
+          <p className="min-w-56 flex-1 text-body-m text-ink-muted">
+            {path.status === 'eliminated' ? (
+              <>
+                Out in the {path.eliminatedIn.round.toLowerCase()} to{' '}
+                <span className="text-ink">{path.eliminatedIn.opponent.name}</span>, who the
+                model read as {path.eliminatedIn.dna.identity.toLowerCase()}.
+              </>
+            ) : (
+              <>
+                Still in. The wall on paper was the{' '}
+                <span className="text-ink">{path.hardest.round.toLowerCase()}</span> against{' '}
+                <span className="text-ink">{path.hardest.opponent.name}</span>, at{' '}
+                {path.hardest.matchup.projection.winPct}%.
+              </>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => navigate('/matchup/opponents')}>
+              <Radar />
+              Scout the field
+            </Button>
+            {path.next && (
+              <Button variant="primary" onClick={() => navigate('/matchup')}>
+                <Target />
+                Prepare the {path.next.round.toLowerCase()}
+              </Button>
+            )}
+          </div>
+        </HudPanel>
+      </Reveal>
+    </section>
+  )
+}
+
 function EventBracket({ game, event }) {
   const navigate = useNavigate()
   const rounds = bracketFor(game.id, event.id)
@@ -305,6 +448,8 @@ function EventBracket({ game, event }) {
           <LiveViewer match={feed} others={matches} onSelect={() => {}} />
         </Reveal>
       )}
+
+      <EventPath game={game} event={event} />
 
       <section>
         <HudSection eyebrow="Draw" title="Bracket" />

@@ -5,6 +5,7 @@ import GameTile from '../components/GameTile'
 import Reveal from '../components/Reveal'
 import DnaRadar, { RadarLegend } from '../components/DnaRadar'
 import MatchupBars from '../components/MatchupBars'
+import HeadToHead from '../components/HeadToHead'
 import InsightCard, { InsightBullet } from '../components/InsightCard'
 import CoverageNote from '../components/CoverageNote'
 import {
@@ -21,7 +22,7 @@ import { ArrowRight, Clock, Radar, Shield, Target } from '../components/icons'
 import { useGame } from '../gameContext'
 import { GAMES_BY_ID } from '../data/games'
 import { TEAM_DIMENSIONS } from '../data/dna'
-import { upcomingFor } from '../data/matchup'
+import { headToHeadFor, upcomingFor } from '../data/matchup'
 import { player } from '../data/mock'
 
 /**
@@ -46,6 +47,7 @@ export default function Matchup() {
   const [fixtureId, setFixtureId] = useState(fixtures[0].id)
   const fixture = fixtures.find((f) => f.id === fixtureId) ?? fixtures[0]
   const m = fixture.matchup
+  const h2h = headToHeadFor(active.id, fixture.opponent.id)
 
   const series = [
     { key: 'you', label: `${m.mine.name} — you`, values: m.mine.values, tone: 'signal' },
@@ -245,6 +247,19 @@ export default function Matchup() {
           </Reveal>
         </div>
       </section>
+
+      {/* History between these two ---------------------------------------- */}
+      {h2h && (
+        <section>
+          <HudSection
+            eyebrow="History"
+            title={`When you have played ${fixture.opponent.name}`}
+          />
+          <Reveal>
+            <HeadToHead h2h={h2h} />
+          </Reveal>
+        </section>
+      )}
 
       {/* What to do about it -------------------------------------------------- */}
       <section>
