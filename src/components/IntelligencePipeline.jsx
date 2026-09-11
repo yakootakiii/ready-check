@@ -22,20 +22,20 @@ const KIND = {
   input: {
     icon: Layers,
     accent: 'text-ink-muted',
-    rule: 'bg-line',
-    panel: 'bg-surface/60',
+    rule: 'bg-surface',
+    panel: 'bg-surface',
   },
   engine: {
     icon: Cpu,
     accent: 'text-signal',
     rule: 'bg-signal',
-    panel: 'bg-raised/80',
+    panel: 'bg-raised',
   },
   output: {
     icon: Target,
     accent: 'text-edge',
     rule: 'bg-edge',
-    panel: 'bg-surface/85',
+    panel: 'bg-surface',
   },
 }
 
@@ -89,7 +89,7 @@ export default function IntelligencePipeline({ gameId = 'all', className = '' })
               )}
               <span
                 aria-hidden="true"
-                className={`absolute left-0 top-3 flex h-6 w-6 items-center justify-center rounded-full border border-line bg-base ${kind.accent}`}
+                className={`absolute left-0 top-3 flex h-6 w-6 items-center justify-center rounded-full border border-surface bg-base ${kind.accent}`}
                 style={{
                   animation: `stage-pulse 5s ease-in-out ${i * 0.55}s infinite`,
                 }}
@@ -125,7 +125,7 @@ export default function IntelligencePipeline({ gameId = 'all', className = '' })
                     {stage.items.map((item) => (
                       <span
                         key={item}
-                        className="rounded-full border border-line px-2.5 py-0.5 font-mono text-body-s text-ink-muted"
+                        className="rounded-full border border-surface px-2.5 py-0.5 font-mono text-body-s text-ink-muted"
                       >
                         {item}
                       </span>

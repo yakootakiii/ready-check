@@ -16,9 +16,9 @@ import { ArrowRight } from './icons'
 
 export const INSIGHT_TONES = {
   signal: { rule: 'bg-signal', text: 'text-signal', glow: 'signal' },
-  edge: { rule: 'bg-edge', text: 'text-edge', glow: 'signal' },
-  ember: { rule: 'bg-ember', text: 'text-ember', glow: 'ember' },
-  muted: { rule: 'bg-line', text: 'text-ink-muted', glow: 'signal' },
+  edge: { rule: 'bg-edge', text: 'text-edge', glow: 'edge' },
+  ember: { rule: 'bg-raised', text: 'text-ink-muted', glow: 'signal' },
+  muted: { rule: 'bg-surface', text: 'text-ink-muted', glow: 'signal' },
 }
 
 export default function InsightCard({

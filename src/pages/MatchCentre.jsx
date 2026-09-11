@@ -121,7 +121,7 @@ export default function MatchCentre() {
         <div className="grid gap-4 lg:grid-cols-3">
           <Reveal>
             <HudPanel className="h-full p-5">
-              <HudLabel className="text-ember">Their game</HudLabel>
+              <HudLabel className="text-ink-muted">Their game</HudLabel>
               <ul className="mt-3 space-y-2.5">
                 {m.theirStrengths.map((item) => (
                   <InsightBullet key={item.key} tone="ember">
@@ -129,7 +129,7 @@ export default function MatchCentre() {
                   </InsightBullet>
                 ))}
               </ul>
-              <p className="mt-4 border-t border-line pt-3 text-body-s text-ink-muted">
+              <p className="mt-4 border-t border-surface pt-3 text-body-s text-ink-muted">
                 Expected tempo: <span className="text-ink">{m.expectedTempo.label}</span>.{' '}
                 {m.expectedTempo.note}
               </p>
@@ -216,8 +216,8 @@ export default function MatchCentre() {
                         key={name}
                         className={`rounded-base border px-2.5 py-1 text-body-s ${
                           i === 4
-                            ? 'border-line text-ink-muted'
-                            : 'border-signal/40 bg-signal/10 text-signal'
+                            ? 'border-surface text-ink-muted'
+                            : 'border-signal bg-signal text-ink'
                         }`}
                       >
                         {name}

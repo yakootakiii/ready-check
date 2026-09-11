@@ -93,7 +93,7 @@ function BackerDirectory({ kind }) {
 
       <NetworkTabs />
 
-      <label className="mb-5 flex items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+      <label className="mb-5 flex items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
         <Search className="shrink-0 text-ink-muted" />
         <span className="sr-only">Search {config.title.toLowerCase()}</span>
         <input
@@ -121,7 +121,7 @@ function BackerDirectory({ kind }) {
                   <div className="flex items-start gap-4">
                     <span
                       aria-hidden="true"
-                      className="flex h-12 w-12 shrink-0 items-center justify-center border border-platinum/40 font-display text-body-m font-bold text-platinum"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center border border-platinum font-display text-body-m font-bold text-platinum"
                       style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 78%, 78% 100%, 0 100%, 0 22%)' }}
                     >
                       {backer.short}
@@ -137,7 +137,7 @@ function BackerDirectory({ kind }) {
                     {backer.titles > 0 && (
                       <span
                         title={`${backer.titles} championships won`}
-                        className="flex shrink-0 items-center gap-1.5 rounded-full border border-gold/50 px-2.5 py-0.5 text-body-s text-gold"
+                        className="flex shrink-0 items-center gap-1.5 rounded-full border border-gold px-2.5 py-0.5 text-body-s text-gold"
                       >
                         <Trophy />
                         {backer.titles}
@@ -155,7 +155,7 @@ function BackerDirectory({ kind }) {
                     </span>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-4 gap-3 border-t border-line pt-4">
+                  <div className="mt-5 grid grid-cols-4 gap-3 border-t border-surface pt-4">
                     <div>
                       <HudLabel>Teams</HudLabel>
                       <div className="mt-1 font-mono text-mono-m text-ink">{backer.teams.length}</div>
@@ -180,7 +180,7 @@ function BackerDirectory({ kind }) {
                     <StatBar pct={backer.winRate} color="bg-platinum" delay={i * 55 + 200} />
                   </div>
 
-                  <div className="mt-auto flex items-center gap-2 border-t border-line pt-4 text-body-s">
+                  <div className="mt-auto flex items-center gap-2 border-t border-surface pt-4 text-body-s">
                     {top ? (
                       <>
                         <Trophy className={`shrink-0 ${placementTone(top.placement)}`} />
@@ -296,14 +296,14 @@ function BackerDetail({ backer }) {
                     {team.roster.map((p) => (
                       <li
                         key={p.id}
-                        className="rounded-base border border-line bg-raised/60 px-2 py-1 text-body-s text-ink-muted"
+                        className="rounded-base border border-surface bg-raised px-2 py-1 text-body-s text-ink-muted"
                       >
                         <span className="text-ink">{p.name}</span> · {p.role}
                       </li>
                     ))}
                   </ul>
 
-                  <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
+                  <div className="mt-4 flex items-center justify-between border-t border-surface pt-3">
                     <span className={`text-body-s ${t.text}`}>{t.label}</span>
                     <span className="text-body-s text-ink-muted">
                       {team.accolades.length}{' '}
@@ -323,7 +323,7 @@ function BackerDetail({ backer }) {
           <HudSection eyebrow="Honours" title={`${backer.accolades.length} placements`} />
           <HudPanel className="p-4">
             {backer.accolades.length ? (
-              <ul className="divide-y divide-line">
+              <ul className="divide-y divide-surface">
                 {backer.accolades.slice(0, 10).map((a) => (
                   <AccoladeRow key={a.id} accolade={a} showTeam />
                 ))}
@@ -343,7 +343,7 @@ function BackerDetail({ backer }) {
               <HudPanel className="p-5">
                 <div className="flex items-center gap-2">
                   <LivePip />
-                  <HudLabel className="text-ember">Running now</HudLabel>
+                  <HudLabel className="text-ink-muted">Running now</HudLabel>
                 </div>
                 <ul className="mt-3 space-y-2">
                   {backer.running.length ? (
@@ -373,7 +373,7 @@ function BackerDetail({ backer }) {
                       <span
                         aria-hidden="true"
                         className={`h-2 w-2 shrink-0 rounded-full ${
-                          event.status === 'open' ? 'bg-signal' : 'bg-line'
+                          event.status === 'open' ? 'bg-signal' : 'bg-surface'
                         }`}
                       />
                       <span className="min-w-0 flex-1 truncate text-body-m text-ink">

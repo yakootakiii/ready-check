@@ -27,8 +27,8 @@ export default function NetworkTabs() {
           className={({ isActive }) =>
             `flex items-center gap-2 rounded-base border px-3 py-2 text-body-m transition-colors duration-150 ${
               isActive
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`
           }
         >

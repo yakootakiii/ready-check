@@ -44,7 +44,7 @@ function GamePicker() {
         subtitle="Pick a title to see its running tournaments and the match on air right now."
       />
 
-      <label className="mb-5 flex items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+      <label className="mb-5 flex items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
         <Search className="shrink-0 text-ink-muted" />
         <span className="sr-only">Search titles</span>
         <input
@@ -67,7 +67,7 @@ function GamePicker() {
                 interactive
                 glow={summary.ongoing ? 'ember' : 'signal'}
                 onClick={() => open(game.id)}
-                className={`h-full w-full p-5 text-left ${selected ? 'border-signal/70' : ''}`}
+                className={`h-full w-full p-5 text-left ${selected ? 'border-signal' : ''}`}
               >
                 <div className="flex items-start gap-4">
                   <GameTile game={game} size="l" />
@@ -80,14 +80,14 @@ function GamePicker() {
                     </div>
                   </div>
                   {summary.ongoing > 0 && (
-                    <span className="flex shrink-0 items-center gap-2 rounded-full border border-ember/60 px-2.5 py-0.5 text-body-s text-ember">
+                    <span className="flex shrink-0 items-center gap-2 rounded-full border border-ember px-2.5 py-0.5 text-body-s text-ember">
                       <LivePip />
                       {summary.ongoing}
                     </span>
                   )}
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-line pt-4">
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-surface pt-4">
                   <div>
                     <HudLabel>Running</HudLabel>
                     <div className="mt-1 font-mono text-mono-m text-ink">{summary.ongoing}</div>
@@ -126,9 +126,9 @@ function GamePicker() {
    --------------------------------------------------------------------------- */
 
 const STATUS = {
-  live: { label: 'Running', className: 'border-ember/60 text-ember' },
-  open: { label: 'Registration open', className: 'border-signal/60 text-signal' },
-  soon: { label: 'Announced', className: 'border-line text-ink-muted' },
+  live: { label: 'Running', className: 'border-ember text-ember' },
+  open: { label: 'Registration open', className: 'border-signal text-signal' },
+  soon: { label: 'Announced', className: 'border-surface text-ink-muted' },
 }
 
 function GameCircuit({ game }) {
@@ -201,7 +201,7 @@ function GameCircuit({ game }) {
                     {event.window} · {event.venue}
                   </div>
 
-                  <div className="mt-5 flex items-end justify-between border-t border-line pt-4">
+                  <div className="mt-5 flex items-end justify-between border-t border-surface pt-4">
                     <div>
                       <HudLabel>Prize</HudLabel>
                       <div className="mt-1 font-mono text-mono-m text-signal">{event.prize}</div>
@@ -251,7 +251,7 @@ function MatchCard({ match, game }) {
         const t = tierOf(side.entrant.tier)
         return (
           <div key={side.entrant.id} className="flex items-center gap-3 py-1">
-            <span aria-hidden="true" className={`h-6 w-0.5 shrink-0 ${won ? t.bg : 'bg-line'}`} />
+            <span aria-hidden="true" className={`h-6 w-0.5 shrink-0 ${won ? t.bg : 'bg-surface'}`} />
             <span
               className={`min-w-0 flex-1 truncate text-body-m ${won ? 'text-ink' : 'text-ink-muted'}`}
             >
@@ -267,7 +267,7 @@ function MatchCard({ match, game }) {
         )
       })}
       {!match.done && (
-        <div className="mt-2 flex items-center gap-2 border-t border-line pt-2 text-body-s text-ember">
+        <div className="mt-2 flex items-center gap-2 border-t border-surface pt-2 text-body-s text-ember">
           <LivePip />
           In progress
         </div>
@@ -346,7 +346,7 @@ function EventPath({ game, event }) {
                     {leg.dna.identity}
                   </span>
 
-                  <span className="mt-4 flex items-baseline justify-between gap-3 border-t border-line pt-3">
+                  <span className="mt-4 flex items-baseline justify-between gap-3 border-t border-surface pt-3">
                     <span className="text-body-s text-ink-muted">
                       Model gave you{' '}
                       <span className="font-mono text-mono-m text-ink">

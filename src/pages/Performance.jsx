@@ -153,7 +153,7 @@ export default function Performance() {
         title="How the profile has moved"
         subtitle="Six tracked windows. Every dimension on the same scale, so the shapes are comparable."
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -172,10 +172,10 @@ export default function Performance() {
               setSelectedKey(dimensionsFor(option.key)[0].key)
             }}
             aria-pressed={subject === option.key}
-            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 ${
+            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 btn-press ${
               subject === option.key
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`}
           >
             {option.label}
@@ -263,7 +263,7 @@ export default function Performance() {
                   corners={false}
                   onClick={() => setSelectedKey(dim.key)}
                   aria-pressed={isSelected}
-                  className={`w-full p-4 text-left ${isSelected ? 'border-signal/70' : ''}`}
+                  className={`w-full p-4 text-left ${isSelected ? 'border-signal' : ''}`}
                 >
                   <div className="flex items-baseline justify-between gap-2">
                     <HudLabel className="truncate">{dim.label}</HudLabel>

@@ -84,11 +84,11 @@ export default function Home() {
     <div className="space-y-12">
       {/* What the model has worked out, on a loop. The old product tickered
           scores here; scores are the input, and these are the output. */}
-      <Ticker className="-mx-4 border-y border-line bg-surface/50 py-2 md:-mx-6">
+      <Ticker className="-mx-4 border-y border-surface bg-surface py-2 md:-mx-6">
         {ticker.map((item) => (
           <span key={item.id} className="flex items-center gap-2 px-6">
-            <span className="hud-label text-signal">{item.eyebrow}</span>
-            <span className="whitespace-nowrap text-body-m text-ink-muted">{item.text}</span>
+            <span className="hud-label text-ember">{item.eyebrow}</span>
+            <span className="whitespace-nowrap text-body-m text-ink">{item.text}</span>
           </span>
         ))}
       </Ticker>
@@ -97,23 +97,18 @@ export default function Home() {
       <Reveal>
         <AngularPanel
           accent="signal"
-          fill="bg-surface/85"
+          fill="bg-surface"
           innerClassName="sheen-run scanlines relative overflow-hidden p-6 md:p-10"
         >
           <div className="flex flex-wrap items-center gap-10">
             <div className="min-w-72 max-w-2xl flex-1">
-              <HudLabel className="text-signal">Competitive intelligence for esports</HudLabel>
+              <HudLabel className="text-ember">Competitive intelligence for esports</HudLabel>
 
-              <h1 className="mt-3 font-display text-[clamp(3rem,8vw,5.5rem)] font-bold uppercase leading-[0.9] tracking-[-0.02em] text-ink">
+              <h1 className="mt-3 font-display text-[clamp(3rem,8vw,5.5rem)] font-black uppercase leading-[0.9] tracking-[-0.02em] text-ember">
                 Outplay
               </h1>
               <p className="mt-4 font-display text-[clamp(1.25rem,2.6vw,1.75rem)] font-semibold leading-tight text-ink">
-                Know your game. Know your opponent. Outplay.
-              </p>
-              <p className="mt-4 max-w-xl text-body-l text-ink-muted">
-                Outplay learns how players and teams compete, analyses how their styles
-                interact, and turns competitive data into the intelligence needed to gain an
-                edge.
+                Know your game. Know your opponent.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -127,7 +122,7 @@ export default function Home() {
                 </Button>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-line pt-5">
+              <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-surface pt-5">
                 <span className="flex items-center gap-2">
                   <GameTile game={active} size="s" />
                   <span className="text-body-m text-ink-muted">
@@ -135,12 +130,8 @@ export default function Home() {
                   </span>
                 </span>
                 <span className="text-body-s text-ink-muted">
-                  <span className="font-mono text-mono-m text-ink">{accuracy.pct}%</span> of the
-                  last {accuracy.matches} results called
-                </span>
-                <span className="text-body-s text-ink-muted">
-                  <span className="font-mono text-mono-m text-ink">{accuracy.discoveries}</span>{' '}
-                  new tendencies learned
+                  <span className="font-mono text-mono-m text-ember">{accuracy.pct}%</span>{' '}
+                  call accuracy
                 </span>
               </div>
             </div>
@@ -163,7 +154,7 @@ export default function Home() {
           <HudPanel className="h-full p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <HudLabel className="text-signal">Your competitive DNA</HudLabel>
+                <HudLabel className="text-edge">Your competitive DNA</HudLabel>
                 <div className="mt-1.5 font-display text-display-l font-bold text-ink">
                   {mine.identity}
                 </div>
@@ -179,10 +170,10 @@ export default function Home() {
 
             <DnaStrip dna={mine} className="mt-6" />
 
-            <ul className="mt-6 space-y-2 border-t border-line pt-4">
+            <ul className="mt-6 space-y-2 border-t border-surface pt-4">
               {mine.traits.map((trait) => (
                 <li key={trait} className="flex gap-3 text-body-m text-ink-muted">
-                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-signal" />
+                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-edge" />
                   {trait}
                 </li>
               ))}
@@ -193,12 +184,12 @@ export default function Home() {
         <Reveal delay={90}>
           <AngularPanel
             accent="ember"
-            fill="bg-surface/85"
+            fill="bg-surface"
             className="h-full"
             innerClassName="flex h-full flex-col p-6"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <HudLabel className="text-ember">Next match</HudLabel>
+              <HudLabel className="text-edge">Next match</HudLabel>
               <span className="text-body-s text-ink-muted">
                 {fixture.format} · {fixture.kind}
               </span>
@@ -357,7 +348,7 @@ export default function Home() {
                     </span>
                     <Sparkline
                       points={points}
-                      stroke={delta < -1 ? 'var(--color-ember)' : 'var(--color-signal)'}
+                      stroke={delta < -1 ? 'var(--color-ember)' : 'var(--color-edge)'}
                     />
                   </div>
                   <p className="mt-2 text-body-s text-ink-muted">
@@ -416,7 +407,7 @@ export default function Home() {
                       <div className="text-ink-muted">{match.score[1]}</div>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
+                  <div className="mt-4 flex items-center justify-between border-t border-surface pt-3">
                     <span className={`text-body-s ${t.text}`}>{t.label}</span>
                     <span className="font-mono text-body-s text-ink-muted">
                       {(match.viewers / 1000).toFixed(1)}k watching

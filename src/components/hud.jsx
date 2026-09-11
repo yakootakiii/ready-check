@@ -5,7 +5,7 @@ import { useCountUp } from '../hooks'
 
 /** All-caps HUD eyebrow. */
 export function HudLabel({ className = '', children }) {
-  return <div className={`hud-label text-ink-muted ${className}`}>{children}</div>
+  return <div className={`hud-label text-ink-muted opacity-95 ${className}`}>{children}</div>
 }
 
 /** A pulsing live indicator. `currentColor` drives the pulse ring. */
@@ -33,13 +33,16 @@ export function HudPanel({
 }) {
   const glowClass =
     glow === 'ember'
-      ? 'hover:border-ember/60 hover:shadow-glow-ember'
-      : 'hover:border-signal/60 hover:shadow-glow-signal'
+      ? 'hover:border-ember hover:shadow-glow-ember'
+      : glow === 'edge'
+        ? 'hover:border-edge hover:shadow-glow-edge'
+        : 'hover:border-signal hover:shadow-glow-signal'
 
   return (
     <Tag
       className={[
-        'relative rounded-base border border-line bg-surface/85',
+        'relative rounded-base border border-surface bg-surface',
+        'shadow-[inset_0_0_0_1px_rgba(255,255,255,0.025),inset_0_1px_0_rgba(255,255,255,0.02)]',
         'transition-[transform,border-color,box-shadow] duration-200',
         corners ? 'hud-corners' : '',
         interactive ? `sheen -translate-y-0 hover:-translate-y-1 ${glowClass}` : '',
@@ -122,7 +125,7 @@ export function Countdown({ seconds: initial }) {
       {blocks.map((block) => (
         <div
           key={block.label}
-          className="min-w-14 rounded-base border border-line bg-base/60 px-2 py-1.5 text-center"
+          className="min-w-14 rounded-base border border-surface bg-base px-2 py-1.5 text-center"
         >
           <div className="font-mono text-mono-l text-ink">
             {String(block.value).padStart(2, '0')}
@@ -227,7 +230,7 @@ export function FormRow({ form, className = '' }) {
           key={i}
           title={result === 'w' ? 'Win' : 'Loss'}
           className={`flex h-5 w-5 items-center justify-center rounded-[2px] font-mono text-body-s ${
-            result === 'w' ? 'bg-edge/20 text-edge' : 'bg-ember/15 text-ember'
+            result === 'w' ? 'bg-edge text-ink' : 'bg-raised text-ink-muted'
           }`}
         >
           {result.toUpperCase()}

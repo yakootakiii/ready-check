@@ -89,7 +89,7 @@ export default function Talent() {
         title="Compatibility, not rank"
         subtitle="Roster gaps read from Competitive DNA, and players ranked by whether they close them."
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -105,10 +105,10 @@ export default function Talent() {
             type="button"
             onClick={() => setMode(option.key)}
             aria-pressed={mode === option.key}
-            className={`flex items-center gap-2 rounded-base border px-3 py-2 text-body-m transition-colors duration-150 ${
+            className={`flex items-center gap-2 rounded-base border px-3 py-2 text-body-m transition-colors duration-150 btn-press ${
               mode === option.key
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`}
           >
             <option.icon />
@@ -137,9 +137,9 @@ export default function Talent() {
 
               <div className="mt-6 grid gap-4 lg:grid-cols-3">
                 {gaps.needs.map((need, i) => (
-                  <div key={need.key} className="rounded-base border border-line bg-raised/50 p-4">
+                  <div key={need.key} className="rounded-base border border-surface bg-raised p-4">
                     <div className="flex items-baseline justify-between gap-2">
-                      <HudLabel className="text-ember">{need.label}</HudLabel>
+                      <HudLabel className="text-ink-muted">{need.label}</HudLabel>
                       <span className="font-mono text-mono-m text-ember">{need.value}</span>
                     </div>
                     <div className="mt-2">
@@ -150,7 +150,7 @@ export default function Talent() {
                 ))}
               </div>
 
-              <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-2 border-t border-line pt-4">
+              <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-2 border-t border-surface pt-4">
                 <span className="text-body-s text-ink-muted">
                   Strongest already:{' '}
                   <span className="text-edge">
@@ -174,7 +174,7 @@ export default function Talent() {
               eyebrow="Recommended"
               title="Players who complement this roster"
               action={
-                <label className="flex min-w-56 items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+                <label className="flex min-w-56 items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
                   <Search className="shrink-0 text-ink-muted" />
                   <span className="sr-only">Search candidates</span>
                   <input
@@ -223,7 +223,7 @@ export default function Talent() {
 
                         <DnaStrip dna={candidate.dna} className="mt-4" />
 
-                        <span className="mt-4 block border-t border-line pt-3">
+                        <span className="mt-4 block border-t border-surface pt-3">
                           <ul className="space-y-2">
                             {candidate.reasons.map((reason) => (
                               <InsightBullet key={reason.key} tone="edge">
@@ -238,7 +238,7 @@ export default function Talent() {
                           </ul>
                         </span>
 
-                        <span className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                        <span className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-surface pt-3">
                           <span className="text-body-s text-ink-muted">
                             Gap fit {candidate.needScore} · Style fit {candidate.styleScore} ·
                             Role fit {candidate.roleScore}
@@ -342,8 +342,8 @@ export default function Talent() {
                     <FitScore score={row.fit.score} className="shrink-0" />
                   </span>
 
-                  <span className="mt-4 block border-t border-line pt-3">
-                    <HudLabel className="text-ember">What they need</HudLabel>
+                  <span className="mt-4 block border-t border-surface pt-3">
+                    <HudLabel className="text-ink-muted">What they need</HudLabel>
                     <ul className="mt-2 space-y-1.5">
                       {row.gaps.needs.slice(0, 2).map((need) => (
                         <InsightBullet key={need.key} tone="ember">
@@ -353,7 +353,7 @@ export default function Talent() {
                     </ul>
                   </span>
 
-                  <span className="mt-4 block border-t border-line pt-3">
+                  <span className="mt-4 block border-t border-surface pt-3">
                     <HudLabel className="text-edge">Why you fit</HudLabel>
                     <ul className="mt-2 space-y-1.5">
                       {row.fit.reasons.length > 0 ? (

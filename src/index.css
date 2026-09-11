@@ -19,31 +19,31 @@
     bg-base      ->  bg-base
     bg-surface   ->  bg-surface
     bg-raised    ->  bg-raised
-    border       ->  border-line
+    border       ->  border-surface
     text-primary ->  text-ink
     text-muted   ->  text-ink-muted
 
   Never hardcode these hex values anywhere else.
 */
 @theme {
-  --color-base: #0a0c12;
-  --color-surface: #12151f;
-  --color-raised: #1a1e2b;
-  --color-line: #262b3b;
-  --color-ink: #eef1f8;
-  --color-ink-muted: #8b93ab;
+  /* Brand identity sits in the background, while neutrals carry the interface. */
+  --color-base: #0E1A27;
+  --color-surface: #162B3D;
+  --color-raised: #1D3248;
+  --color-line: #3A5674;
+  --color-ink: #F4F7FA;
+  --color-ink-muted: #D8E3F2;
 
-  --color-signal: #6c8cff;
-  --color-ember: #ff6b4a;
-  --color-edge: #35d6a4;
+  --color-signal: #7B8CFF;
+  --color-edge: #5D6DFF;
+  --color-ember: #E7FF70;
+  --color-accent-cyan: #7B8CFF;
 
-  /* Rank-tier ramp. Rank is a secondary readout in Outplay - Competitive DNA
-     leads - but the ramp is still one shared system across every module. */
-  --color-bronze: #c08552;
-  --color-silver: #a9b0c4;
-  --color-gold: #e5bc55;
-  --color-platinum: #4fd1c5;
-  --color-diamond: #b98cff;
+  --color-bronze: #A9B8C9;
+  --color-silver: #CBD8E7;
+  --color-gold: #E7FF70;
+  --color-platinum: #F6F9FC;
+  --color-diamond: #7B8CFF;
 
   /* Space Grotesk reads technical rather than arcade: the product has to be
      credible to a coach and a recruiter, not only to a player. */
@@ -51,7 +51,7 @@
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --radius-base: 6px;
+  --radius-base: 8px;
 
   --text-display-xl: 40px;
   --text-display-xl--line-height: 44px;
@@ -70,12 +70,10 @@
   --text-mono-l: 22px;
   --text-mono-l--line-height: 26px;
 
-  --shadow-glow-signal: 0 0 0 1px color-mix(in oklab, var(--color-signal) 45%, transparent),
-    0 0 28px -8px color-mix(in oklab, var(--color-signal) 60%, transparent);
-  --shadow-glow-ember: 0 0 0 1px color-mix(in oklab, var(--color-ember) 45%, transparent),
-    0 0 28px -8px color-mix(in oklab, var(--color-ember) 60%, transparent);
-  --shadow-glow-edge: 0 0 0 1px color-mix(in oklab, var(--color-edge) 45%, transparent),
-    0 0 28px -8px color-mix(in oklab, var(--color-edge) 60%, transparent);
+  /* The glow is subtle so the interface still feels premium rather than loud. */
+  --shadow-glow-signal: 0 0 0 1px rgba(123, 140, 255, 0.8), 0 16px 34px -18px rgba(123, 140, 255, 0.95);
+  --shadow-glow-ember: 0 0 0 1px rgba(231, 255, 112, 0.78), 0 18px 30px -18px rgba(231, 255, 112, 0.98);
+  --shadow-glow-edge: 0 0 0 1px rgba(93, 109, 255, 0.8), 0 16px 34px -18px rgba(93, 109, 255, 0.96);
 }
 
 @layer base {
@@ -108,11 +106,71 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-signal) 35%, transparent);
+    background-color: #C2F750;
+    color: #0E1A27;
   }
 }
 
 @layer components {
+  /* Card primitive: low-contrast surfaces with enough depth to feel intentional. */
+  .card {
+    background: rgba(16, 30, 41, 0.92);
+    border: 1px solid rgba(162, 174, 186, 0.16);
+    border-radius: var(--radius-base);
+    padding: 1rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+    transition: transform 160ms cubic-bezier(0.2, 0, 0.1, 1), box-shadow 160ms ease, border-color 160ms ease;
+    will-change: transform;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(8, 13, 19, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    border-color: rgba(83, 99, 238, 0.24);
+  }
+
+  .card--quiet {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  /* Small press motion for buttons and interactive tiles. Respects reduced motion. */
+  .btn-press {
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease, filter 200ms ease;
+    will-change: transform, box-shadow, filter;
+  }
+
+  .btn-press:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+  }
+
+  .btn-press:active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  .btn-press:focus-visible {
+    box-shadow: 0 0 0 2px rgba(123, 140, 255, 0.35), 0 0 0 5px rgba(123, 140, 255, 0.12);
+  }
+
+  /* Tiny spinner used for loading states. */
+  .spinner {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+    border: 2px solid #5363EE;
+    border-top-color: #C2F750;
+    animation: spin 820ms linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   /* The one bold structural device. Applied only through <AngularPanel> so it
      stays an accent, not a theme. */
   .angular-cut {
@@ -170,7 +228,7 @@
     background: linear-gradient(
       105deg,
       transparent 35%,
-      color-mix(in oklab, var(--color-ink) 12%, transparent) 50%,
+      rgba(123, 140, 255, 0.28) 48%,
       transparent 65%
     );
     transform: translateX(-120%);
@@ -181,7 +239,8 @@
     animation: sheen-sweep 900ms ease-out;
   }
 
-  /* Fine scanline film over hero art. */
+  /* Fine scanline film over hero art. Removed to keep large content panels legible.
+     The interface uses lighter panel structure instead of strong repeated green lines. */
   .scanlines::before {
     content: '';
     position: absolute;
@@ -189,10 +248,11 @@
     pointer-events: none;
     background: repeating-linear-gradient(
       to bottom,
-      color-mix(in oklab, var(--color-ink) 5%, transparent) 0 1px,
+      rgba(255, 255, 255, 0.015),
+      rgba(255, 255, 255, 0.015) 1px,
       transparent 1px 3px
     );
-    opacity: 0.35;
+    opacity: 0.6;
   }
 }
 
@@ -426,11 +486,11 @@
     );
     /* The shorthand resets mask-composite, so composite is set after it. */
     -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
+      linear-gradient(#0E1A27 0 0) content-box,
+      linear-gradient(#0E1A27 0 0);
     mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
+      linear-gradient(#0E1A27 0 0) content-box,
+      linear-gradient(#0E1A27 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;

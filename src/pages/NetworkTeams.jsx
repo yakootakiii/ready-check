@@ -19,12 +19,7 @@ import { teamDna } from '../data/dna'
 import { allTeams, findTeam, teamProfile } from '../data/league'
 import { tier as tierOf } from '../tiers'
 import { useGame } from '../gameContext'
-
-/**
- * The Network's team directory, and the shared bits the other Network screens
- * reuse.
- *
- * Team cards lead with the identity the model composed rather than with the
+/* Team cards lead with the identity the model composed rather than with the
  * record, on the titles the engine has actually been calibrated on. On the
  * other twenty they stay a record and a form line — inventing a profile for a
  * scene the model has not seen would undercut the one claim the product is
@@ -47,8 +42,8 @@ export function BackerBadge({ backer, className = '' }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-body-s ${
         backer.type === 'school'
-          ? 'border-platinum/50 text-platinum'
-          : 'border-line text-ink-muted'
+          ? 'border-platinum text-platinum'
+          : 'border-surface text-ink-muted'
       } ${className}`}
     >
       <Icon />
@@ -137,7 +132,7 @@ function TeamDirectory() {
       <NetworkTabs />
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
-        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
           <Search className="shrink-0 text-ink-muted" />
           <span className="sr-only">Search teams</span>
           <input
@@ -157,17 +152,17 @@ function TeamDirectory() {
             key={opt.key}
             type="button"
             onClick={() => setBacking(opt.key)}
-            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 ${
+            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 btn-press ${
               backing === opt.key
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`}
           >
             {opt.label}
           </button>
         ))}
 
-        <label className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2">
+        <label className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2">
           <span className="hud-label text-ink-muted">Sort</span>
           <select
             value={sort}
@@ -234,7 +229,7 @@ function TeamDirectory() {
                     <span className={`text-body-s ${t.text}`}>{t.label}</span>
                   </div>
 
-                  <div className="mt-auto flex items-center gap-2 border-t border-line pt-4 text-body-s">
+                  <div className="mt-auto flex items-center gap-2 border-t border-surface pt-4 text-body-s">
                     {top ? (
                       <>
                         <Trophy className={`shrink-0 ${placementTone(top.placement)}`} />
@@ -309,7 +304,7 @@ function TeamDetail({ team }) {
             title={`${team.roster.length} on the sheet`}
             action={<span className={`text-body-s ${t.text}`}>{t.label}</span>}
           />
-          <HudPanel className="divide-y divide-line p-2">
+          <HudPanel className="divide-y divide-surface p-2">
             {team.roster.map((p, i) => (
               <Reveal key={p.id} delay={i * 60} className="flex items-center gap-4 px-3 py-3">
                 <span className="w-6 font-mono text-mono-m text-ink-muted">{i + 1}</span>
@@ -335,7 +330,7 @@ function TeamDetail({ team }) {
                   <div className="font-mono text-mono-m text-ink">{p.rating}</div>
                   <div
                     className={`font-mono text-body-s ${
-                      p.delta >= 0 ? 'text-signal' : 'text-ember'
+                      p.delta >= 0 ? 'text-signal' : 'text-ink-muted'
                     }`}
                   >
                     {p.delta >= 0 ? '+' : ''}
@@ -350,7 +345,7 @@ function TeamDetail({ team }) {
             <HudSection eyebrow="Honours" title={`${team.accolades.length} placements`} />
             <HudPanel className="p-4">
               {team.accolades.length ? (
-                <ul className="divide-y divide-line">
+                <ul className="divide-y divide-surface">
                   {team.accolades.map((a) => (
                     <AccoladeRow key={a.id} accolade={a} />
                   ))}
@@ -372,7 +367,7 @@ function TeamDetail({ team }) {
               <button
                 type="button"
                 onClick={() => navigate(`/network/${backerRoute}/${team.backer.id}`)}
-                className="mt-3 flex w-full items-center gap-3 text-left transition-colors duration-150 hover:text-signal"
+                className="mt-3 flex w-full items-center gap-3 text-left transition-colors duration-150 btn-press hover:text-signal"
               >
                 {team.backer.type === 'school' ? (
                   <School className="shrink-0 text-platinum" />
@@ -413,7 +408,7 @@ function TeamDetail({ team }) {
                     ) : (
                       <span
                         aria-hidden="true"
-                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-line"
+                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-surface"
                       />
                     )}
                     <span className="min-w-0 flex-1">

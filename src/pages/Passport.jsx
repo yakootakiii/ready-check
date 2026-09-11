@@ -148,7 +148,7 @@ function VisitedPassport({ entry, onBack }) {
                   <FormRow form={roster.form} />
                 </div>
 
-                <div className="mt-5 border-t border-line pt-4">
+                <div className="mt-5 border-t border-surface pt-4">
                   <HudLabel className="mb-3">Alongside</HudLabel>
                   <ul className="space-y-2">
                     {roster.roster
@@ -169,7 +169,7 @@ function VisitedPassport({ entry, onBack }) {
                   </ul>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-surface pt-4">
                   <Button onClick={() => navigate(`/matchup/opponents/${roster.id}`)}>
                     <Radar />
                     Scout this team
@@ -201,7 +201,7 @@ function VisitedPassport({ entry, onBack }) {
             <Reveal>
               <HudPanel className="p-5">
                 {roster.accolades.length ? (
-                  <ul className="divide-y divide-line">
+                  <ul className="divide-y divide-surface">
                     {roster.accolades.map((accolade) => (
                       <AccoladeRow key={accolade.id} accolade={accolade} />
                     ))}
@@ -214,7 +214,7 @@ function VisitedPassport({ entry, onBack }) {
                   </p>
                 )}
 
-                <div className="mt-5 border-t border-line pt-4">
+                <div className="mt-5 border-t border-surface pt-4">
                   <HudLabel>Entered this season</HudLabel>
                   <ul className="mt-3 space-y-2">
                     {roster.tournaments.map((event) => (
@@ -222,7 +222,7 @@ function VisitedPassport({ entry, onBack }) {
                         <span
                           aria-hidden="true"
                           className={`h-5 w-1 shrink-0 rounded-full ${
-                            event.status === 'live' ? 'bg-ember' : 'bg-line'
+                            event.status === 'live' ? 'bg-ember' : 'bg-surface'
                           }`}
                         />
                         <span className="min-w-0 flex-1 truncate text-body-m text-ink">
@@ -297,7 +297,7 @@ function OwnPassport({ seededGameId }) {
               </span>
             }
           />
-          <HudPanel className="divide-y divide-line p-2">
+          <HudPanel className="divide-y divide-surface p-2">
             {achievements.map((achievement, i) => (
               <Reveal
                 key={achievement.id}
@@ -321,7 +321,7 @@ function OwnPassport({ seededGameId }) {
           </HudPanel>
 
           <HudSection eyebrow="Where you have played" title="Team history" className="mt-8" />
-          <HudPanel className="divide-y divide-line p-2">
+          <HudPanel className="divide-y divide-surface p-2">
             {history.map((row, i) => (
               <Reveal key={row.id} delay={i * 60} className="flex items-center gap-4 px-3 py-3">
                 <span className="w-24 shrink-0 font-mono text-mono-m text-ink-muted">
@@ -408,7 +408,7 @@ function OwnPassport({ seededGameId }) {
                     )
                   })}
                 </ul>
-                <p className="mt-3 border-t border-line pt-3 text-body-s text-ink-muted">
+                <p className="mt-3 border-t border-surface pt-3 text-body-s text-ink-muted">
                   {genreOf(game).label} · {game.platform}
                 </p>
               </HudPanel>
@@ -461,8 +461,8 @@ function DnaSection({ dna }) {
                   </InsightBullet>
                 ))}
               </ul>
-              <div className="mt-5 border-t border-line pt-4">
-                <HudLabel className="text-ember">Development priorities</HudLabel>
+              <div className="mt-5 border-t border-surface pt-4">
+                <HudLabel className="text-ink-muted">Development priorities</HudLabel>
                 <ul className="mt-3 space-y-2">
                   {dna.weaknesses.map((weakness) => (
                     <InsightBullet key={weakness} tone="ember">

@@ -15,7 +15,7 @@ export default function MobileTabBar() {
     <nav
       aria-label="Modules (bottom bar)"
       style={{ gridTemplateColumns: `repeat(${MOBILE_TABS.length}, minmax(0, 1fr))` }}
-      className="fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-surface/95 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 grid border-t border-surface bg-surface md:hidden"
     >
       {MOBILE_TABS.map((tab) => {
         const active = tab.match ? pathname.startsWith(tab.match) : pathname === tab.to
@@ -24,10 +24,11 @@ export default function MobileTabBar() {
             key={tab.to}
             to={tab.to}
             aria-current={active ? 'page' : undefined}
-            className={`flex flex-col items-center gap-1 py-2 text-body-s transition-colors duration-100 ${
+            className={`flex flex-col items-center gap-1 py-2 text-body-s transition-colors duration-100 btn-press ${
               active ? 'text-signal' : 'text-ink-muted'
             }`}
           >
+            
             <tab.icon />
             {tab.label}
           </NavLink>

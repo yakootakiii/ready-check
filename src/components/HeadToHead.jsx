@@ -45,12 +45,12 @@ export default function HeadToHead({ h2h, className = '' }) {
         )}
       </div>
 
-      <ul className="mt-5 divide-y divide-line border-t border-line">
+      <ul className="mt-5 divide-y divide-surface border-t border-surface">
         {meetings.map((meeting) => (
           <li key={meeting.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3">
             <span
               aria-hidden="true"
-              className={`h-7 w-0.5 shrink-0 rounded-full ${meeting.won ? 'bg-edge' : 'bg-ember'}`}
+              className={`h-7 w-0.5 shrink-0 rounded-full ${meeting.won ? 'bg-edge' : 'bg-raised'}`}
             />
             <span
               className={`w-14 shrink-0 font-mono text-mono-m ${
@@ -84,7 +84,7 @@ export default function HeadToHead({ h2h, className = '' }) {
         ))}
       </ul>
 
-      <div className="mt-5 space-y-2 border-t border-line pt-4">
+      <div className="mt-5 space-y-2 border-t border-surface pt-4">
         <p className="flex flex-wrap items-baseline gap-x-2 text-body-m text-ink-muted">
           Since the first of these, their{' '}
           <span className="text-ink">{drifted.label.toLowerCase()}</span> has moved

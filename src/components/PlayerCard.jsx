@@ -88,7 +88,7 @@ export default function PlayerCard({
                   trajectory.tone === 'edge'
                     ? 'text-edge'
                     : trajectory.tone === 'ember'
-                      ? 'text-ember'
+                      ? 'text-ink-muted'
                       : 'text-ink-muted'
                 }`}
               >
@@ -100,13 +100,13 @@ export default function PlayerCard({
       </div>
 
       {dna && (
-        <div className="mt-6 border-t border-line pt-6">
+        <div className="mt-6 border-t border-surface pt-6">
           <HudLabel className="mb-3">Competitive DNA</HudLabel>
           <DnaStrip dna={dna} />
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-6 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-surface pt-6 sm:grid-cols-3 lg:grid-cols-5">
         {[
           { label: 'Win rate', value: profile.winRate },
           { label: 'Matches analysed', value: profile.matchesAnalyzed },
@@ -121,7 +121,7 @@ export default function PlayerCard({
         ]
           .filter(Boolean)
           .map((stat) => (
-          <div key={stat.label} className="rounded-base border border-line bg-raised/60 p-3">
+          <div key={stat.label} className="rounded-base border border-surface bg-raised p-3">
             <HudLabel>{stat.label}</HudLabel>
             <div className="mt-1.5 font-mono text-mono-m text-ink">{stat.value}</div>
           </div>
@@ -131,14 +131,14 @@ export default function PlayerCard({
       {dna && <ConfidenceMeter dna={dna} className="mt-6" />}
 
       {highlights.length > 0 && (
-        <div className="mt-6 border-t border-line pt-6">
+        <div className="mt-6 border-t border-surface pt-6">
           <HudLabel className="text-signal">Notable performances ({highlights.length})</HudLabel>
           <ul className="mt-3 grid gap-2 sm:grid-cols-3">
             {highlights.map((clip) => (
               <li key={clip.id}>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-base border border-line bg-raised px-3 py-2 text-left transition-colors duration-100 hover:bg-line"
+                  className="flex w-full items-center gap-3 rounded-base border border-surface bg-raised px-3 py-2 text-left transition-colors duration-100 btn-press hover:bg-surface"
                 >
                   <Play className="shrink-0 text-signal" />
                   <span className="min-w-0 flex-1">
@@ -158,7 +158,7 @@ export default function PlayerCard({
       )}
 
       {orgActions && (
-        <div className="mt-6 flex flex-wrap gap-3 border-t border-line pt-6">
+        <div className="mt-6 flex flex-wrap gap-3 border-t border-surface pt-6">
           <Button variant="primary">Message {player.handle}</Button>
           <Button>Invite to tryout</Button>
         </div>
@@ -175,14 +175,14 @@ export function ProfileTabs({ player, activeGameId, onSelect }) {
         const game = GAMES_BY_ID[profile.gameId]
         const active = profile.gameId === activeGameId
         return (
-          <button
+            <button
             key={profile.gameId}
             type="button"
             onClick={() => onSelect(profile.gameId)}
-            className={`flex items-center gap-2 rounded-base border px-3 py-2 text-body-m transition-colors duration-100 ${
+            className={`flex items-center gap-2 rounded-base border px-3 py-2 text-body-m transition-colors duration-100 btn-press ${
               active
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`}
           >
             <GameTile game={game} size="s" />

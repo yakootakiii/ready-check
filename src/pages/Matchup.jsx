@@ -61,7 +61,7 @@ export default function Matchup() {
         title={`vs. ${fixture.opponent.name}`}
         subtitle={`${m.mine.name} · ${fixture.kind} · ${fixture.format} · ${fixture.venue}`}
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -81,10 +81,10 @@ export default function Matchup() {
               type="button"
               onClick={() => setFixtureId(option.id)}
               aria-current={selected ? 'true' : undefined}
-              className={`min-w-40 rounded-base border px-3 py-2 text-left transition-colors duration-150 ${
+              className={`min-w-40 rounded-base border px-3 py-2 text-left transition-colors duration-150 btn-press ${
                 selected
-                  ? 'border-signal/70 bg-raised text-ink'
-                  : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                  ? 'border-signal bg-raised text-ink'
+                  : 'border-surface bg-surface text-ink-muted hover:text-ink'
               }`}
             >
               <span className="block truncate text-body-m">{option.opponent.name}</span>
@@ -101,7 +101,7 @@ export default function Matchup() {
       <Reveal key={fixture.id}>
         <AngularPanel
           accent="signal"
-          fill="bg-surface/85"
+          fill="bg-surface"
           innerClassName="scanlines relative overflow-hidden p-6 md:p-8"
         >
           <HudLabel className="text-signal">Matchup insight</HudLabel>
@@ -115,8 +115,8 @@ export default function Matchup() {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="rounded-base border border-ember/40 bg-ember/[0.06] p-5">
-              <HudLabel className="text-ember">Primary concern</HudLabel>
+            <div className="rounded-base border border-surface bg-raised p-5">
+              <HudLabel className="text-ink-muted">Primary concern</HudLabel>
               <div className="mt-2 font-display text-display-m font-semibold text-ink">
                 {m.primaryConcern ? m.primaryConcern.label : 'Nothing decisive'}
               </div>
@@ -127,8 +127,8 @@ export default function Matchup() {
               </p>
             </div>
 
-            <div className="rounded-base border border-edge/40 bg-edge/[0.06] p-5">
-              <HudLabel className="text-edge">Potential edge</HudLabel>
+            <div className="rounded-base border border-edge bg-edge p-5">
+              <HudLabel className="text-ink">Potential edge</HudLabel>
               <div className="mt-2 font-display text-display-m font-semibold text-ink">
                 {m.primaryEdge ? m.primaryEdge.label : 'Nothing decisive'}
               </div>
@@ -140,7 +140,7 @@ export default function Matchup() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-line pt-5">
+          <div className="mt-8 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-surface pt-5">
             <div>
               <HudLabel className="mb-2">Starts in</HudLabel>
               <Countdown key={fixture.id} seconds={fixture.startsInSeconds} />
@@ -188,7 +188,7 @@ export default function Matchup() {
                 youLabel={m.mine.name}
                 themLabel={fixture.opponent.name}
               />
-              <p className="mt-5 border-t border-line pt-4 text-body-s text-ink-muted">
+              <p className="mt-5 border-t border-surface pt-4 text-body-s text-ink-muted">
                 A gap under six points is inside the model's own noise and is shown as even —
                 putting a recommendation on top of a rounding error is how analytics products
                 lose a coach's trust.
@@ -204,7 +204,7 @@ export default function Matchup() {
         <div className="grid gap-4 lg:grid-cols-3">
           <Reveal>
             <HudPanel className="h-full p-5">
-              <HudLabel className="text-ember">Strongest tendencies</HudLabel>
+              <HudLabel className="text-ink-muted">Strongest tendencies</HudLabel>
               <ul className="mt-3 space-y-3">
                 {m.theirStrengths.map((item) => (
                   <InsightBullet key={item.key} tone="ember">
@@ -236,8 +236,8 @@ export default function Matchup() {
               <p className="mt-3 text-body-m text-ink">
                 {fixture.opponent.name} wins by {m.theirWinCondition}.
               </p>
-              <div className="mt-4 border-t border-line pt-3">
-                <HudLabel className="text-ember">Role reliance</HudLabel>
+              <div className="mt-4 border-t border-surface pt-3">
+                <HudLabel className="text-ink-muted">Role reliance</HudLabel>
                 <p className="mt-1.5 text-body-m text-ink-muted">
                   <span className="text-ink">{m.roleReliance.level}.</span>{' '}
                   {m.roleReliance.note}
@@ -279,7 +279,7 @@ export default function Matchup() {
               <Reveal key={focus.key} delay={i * 80}>
                 <HudPanel interactive corners={false} className="h-full p-5">
                   <div className="flex items-baseline justify-between gap-3">
-                    <HudLabel className="text-ember">{focus.title}</HudLabel>
+                    <HudLabel className="text-ink-muted">{focus.title}</HudLabel>
                     <span className="font-mono text-mono-m text-ember">−{focus.gap}</span>
                   </div>
                   <p className="mt-3 text-body-m text-ink">{focus.action}</p>
@@ -323,7 +323,7 @@ export default function Matchup() {
                   is much harder to mistake for a certainty. */}
               <div className="relative h-2 w-full overflow-hidden rounded-full bg-raised">
                 <div
-                  className="absolute inset-y-0 rounded-full bg-signal/30"
+                  className="absolute inset-y-0 rounded-full bg-signal"
                   style={{
                     left: `${Math.max(0, m.projection.winPct - m.projection.band)}%`,
                     width: `${Math.min(100, m.projection.band * 2)}%`,

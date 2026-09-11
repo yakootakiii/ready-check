@@ -72,7 +72,7 @@ export default function Analyze() {
         title={subject === 'team' ? `How ${teamDnaProfile.name} competes` : `How ${player.handle} competes`}
         subtitle="Twelve behavioural dimensions, modelled from analysed matches. Read as a shape, not a score."
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -88,10 +88,10 @@ export default function Analyze() {
             type="button"
             onClick={() => setSubject(option.key)}
             aria-pressed={subject === option.key}
-            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 ${
+            className={`rounded-base border px-3 py-2 text-body-m transition-colors duration-150 btn-press ${
               subject === option.key
-                ? 'border-signal/70 bg-raised text-ink'
-                : 'border-line bg-surface/60 text-ink-muted hover:text-ink'
+                ? 'border-signal bg-raised text-ink'
+                : 'border-surface bg-surface text-ink-muted hover:text-ink'
             }`}
           >
             {option.label}
@@ -189,7 +189,7 @@ export default function Analyze() {
               </Reveal>
               <Reveal delay={80}>
                 <HudPanel className="h-full p-5">
-                  <HudLabel className="text-ember">Role reliance</HudLabel>
+                  <HudLabel className="text-ink-muted">Role reliance</HudLabel>
                   <div className="mt-2 font-display text-display-l font-bold text-ink">
                     {teamDnaProfile.roleReliance.level}
                   </div>
@@ -241,7 +241,7 @@ export default function Analyze() {
               </Reveal>
               <Reveal delay={160}>
                 <HudPanel className="h-full p-5">
-                  <HudLabel className="text-ember">Development priorities</HudLabel>
+                  <HudLabel className="text-ink-muted">Development priorities</HudLabel>
                   <ul className="mt-3 space-y-2">
                     {playerDnaProfile.weaknesses.map((weakness) => (
                       <InsightBullet key={weakness} tone="ember">

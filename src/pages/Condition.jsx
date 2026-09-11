@@ -100,7 +100,7 @@ export default function Condition() {
                   </span>
                   <div className="relative flex w-full justify-center" style={{ height: CHART_H }}>
                     <div
-                      className="animate-bar-y absolute bottom-0 w-full rounded-sm bg-signal/50"
+                      className="animate-bar-y absolute bottom-0 w-full rounded-sm bg-signal"
                       style={{
                         height: `${Math.max(
                           8,
@@ -111,7 +111,7 @@ export default function Condition() {
                       title={`${day.day}: ${day.sleep}h sleep`}
                     />
                     <div
-                      className="animate-bar-y absolute bottom-0 w-2 rounded-sm bg-ember/80"
+                      className="animate-bar-y absolute bottom-0 w-2 rounded-sm bg-raised"
                       style={{
                         height: `${(day.load / MAX_LOAD) * CHART_H}px`,
                         animationDelay: `${300 + i * 70}ms`,
@@ -124,13 +124,13 @@ export default function Condition() {
               ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-6 border-t border-line pt-4 text-body-s">
+            <div className="mt-6 flex flex-wrap gap-6 border-t border-surface pt-4 text-body-s">
               <span className="flex items-center gap-2 text-ink-muted">
-                <span aria-hidden="true" className="h-2 w-4 rounded-sm bg-signal/50" />
+                <span aria-hidden="true" className="h-2 w-4 rounded-sm bg-signal" />
                 Hours slept (axis from {SLEEP_FLOOR}h)
               </span>
               <span className="flex items-center gap-2 text-ink-muted">
-                <span aria-hidden="true" className="h-2 w-2 rounded-sm bg-ember/80" />
+                <span aria-hidden="true" className="h-2 w-2 rounded-sm bg-ember" />
                 Practice load
               </span>
               <span className="text-ink-muted">Number above each day is that day's readiness.</span>
@@ -174,7 +174,7 @@ export default function Condition() {
                     ? 'Above your sustainable range this week.'
                     : 'Within your usual range.'}
                 </p>
-                <p className="mt-3 border-t border-line pt-3 text-body-s text-ink-muted">
+                <p className="mt-3 border-t border-surface pt-3 text-body-s text-ink-muted">
                   Read against{' '}
                   <span className="text-signal">
                     {dimensionOf('player', factor.explains)?.label ?? factor.label}

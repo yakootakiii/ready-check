@@ -19,12 +19,12 @@ function ScrimRow({ scrim, showGame, requested, onRequest, delay, likeness }) {
   return (
     <Reveal
       delay={delay}
-      className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-line px-4 py-3 transition-colors duration-100 last:border-b-0 hover:bg-raised"
+      className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-surface px-4 py-3 transition-colors duration-100 last:border-b-0 hover:bg-raised"
     >
       {scrim.open ? (
         <LivePip className="text-signal" />
       ) : (
-        <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-line" />
+        <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-surface" />
       )}
       {showGame && <GameTile game={game} size="s" />}
 
@@ -144,7 +144,7 @@ export default function Scrims() {
         {filters.map((filter) => (
           <span
             key={filter.label}
-            className="rounded-base border border-line bg-surface/85 px-3 py-1.5 text-body-m"
+            className="rounded-base border border-surface bg-surface px-3 py-1.5 text-body-m"
           >
             <span className="hud-label inline text-ink-muted">{filter.label}</span>{' '}
             <span className="text-ink">{filter.value}</span>

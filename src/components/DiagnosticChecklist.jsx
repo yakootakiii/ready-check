@@ -4,8 +4,8 @@ import { Check, Warn, Fail } from './icons'
 // should visually interrupt an otherwise-calm checklist (spec §5.4).
 const STATES = {
   pass: { Icon: Check, className: 'text-ink-muted', srLabel: 'Passed' },
-  warn: { Icon: Warn, className: 'text-ember', srLabel: 'Warning' },
-  fail: { Icon: Fail, className: 'text-ember', srLabel: 'Failed' },
+  warn: { Icon: Warn, className: 'text-ink-muted', srLabel: 'Warning' },
+  fail: { Icon: Fail, className: 'text-ink-muted', srLabel: 'Failed' },
 }
 
 export default function DiagnosticChecklist({ items, className = '' }) {
@@ -17,7 +17,7 @@ export default function DiagnosticChecklist({ items, className = '' }) {
           <li key={item.id} className="flex items-center gap-3">
             <state.Icon className={`shrink-0 ${state.className}`} />
             <span className="sr-only">{state.srLabel}:</span>
-            <span className={`text-body-m ${item.state === 'pass' ? 'text-ink' : 'text-ember'}`}>
+            <span className={`text-body-m ${item.state === 'pass' ? 'text-ink' : 'text-ink-muted'}`}>
               {item.label}
             </span>
             <span className="ml-auto font-mono text-mono-m text-ink-muted">{item.value}</span>

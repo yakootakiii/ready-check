@@ -36,11 +36,11 @@ export default function VodTimeline({ duration, position, tags, onSeek }) {
               }`}
               aria-label={`Jump to ${formatClock(tag.at)}, ${tag.label}`}
               style={{ left: `${(tag.at / duration) * 100}%` }}
-              className="absolute top-0 -translate-x-1/2"
+              className="absolute top-0 -translate-x-1/2 btn-press"
             >
               <span
                 aria-hidden="true"
-                className={`block h-0 w-0 border-x-4 border-b-[6px] border-x-transparent transition-transform duration-100 hover:scale-125 ${
+                className={`block h-0 w-0 border-x-4 border-b- border-x-transparent transition-transform duration-100 hover:scale-125 ${
                 tag.source === 'model' ? 'border-b-signal' : 'border-b-ember'
               }`}
               />

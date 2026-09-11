@@ -17,7 +17,7 @@ import { HudLabel } from './hud'
 
 const FAVOUR = {
   you: { text: 'text-signal', label: 'You' },
-  them: { text: 'text-ember', label: 'Them' },
+  them: { text: 'text-ink-muted', label: 'Them' },
   even: { text: 'text-ink-muted', label: 'Even' },
 }
 
@@ -32,7 +32,7 @@ export default function MatchupBars({
       <div className="mb-3 flex items-center justify-between gap-4">
         <HudLabel className="text-signal">{youLabel}</HudLabel>
         <HudLabel className="text-ink-muted">Advantage</HudLabel>
-        <HudLabel className="text-ember">{themLabel}</HudLabel>
+        <HudLabel className="text-ink-muted">{themLabel}</HudLabel>
       </div>
 
       <ul className="space-y-3.5 sm:space-y-2.5">
@@ -70,7 +70,7 @@ export default function MatchupBars({
                     style={{ width: `${dim.you}%`, animationDelay: `${100 + i * 45}ms` }}
                   />
                 </div>
-                <span aria-hidden="true" className="h-4 w-px shrink-0 bg-line" />
+                <span aria-hidden="true" className="h-4 w-px shrink-0 bg-surface" />
                 <div className="flex h-2 flex-1 overflow-hidden rounded-r-full bg-raised">
                   <div
                     className="animate-bar-right h-full rounded-r-full bg-ember"
@@ -106,7 +106,7 @@ export function MatchupMeter({ dimension, className = '' }) {
         <div className="flex h-1.5 flex-1 justify-end overflow-hidden rounded-l-full bg-raised">
           <div className="h-full rounded-l-full bg-signal" style={{ width: `${dimension.you}%` }} />
         </div>
-        <span aria-hidden="true" className="h-3 w-px shrink-0 bg-line" />
+        <span aria-hidden="true" className="h-3 w-px shrink-0 bg-surface" />
         <div className="flex h-1.5 flex-1 overflow-hidden rounded-r-full bg-raised">
           <div className="h-full rounded-r-full bg-ember" style={{ width: `${dimension.them}%` }} />
         </div>

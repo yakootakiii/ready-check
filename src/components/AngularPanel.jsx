@@ -2,8 +2,10 @@ import { tier as tierOf } from '../tiers'
 
 const accentClass = (accent) => {
   if (accent === 'signal') return 'bg-signal'
-  if (accent === 'ember') return 'bg-ember'
-  if (accent === 'line') return 'bg-line'
+  // Legacy 'ember' accent is remapped to a neutral raised plate so the
+  // visual language remains the three-color system (signal / edge / base).
+  if (accent === 'ember') return 'bg-raised'
+  if (accent === 'line') return 'bg-surface'
   return tierOf(accent).bg
 }
 
@@ -24,7 +26,7 @@ const accentClass = (accent) => {
 export default function AngularPanel({
   as: Tag = 'div',
   accent = 'signal',
-  fill = 'bg-surface/85',
+  fill = 'bg-surface',
   className = '',
   innerClassName = '',
   children,

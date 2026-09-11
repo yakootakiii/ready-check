@@ -56,7 +56,7 @@ export default function VodIntel() {
         title="Review"
         subtitle={`${title} · recorded ${vod.recorded}`}
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {flagged.length} model flags · {tags.length - flagged.length} yours
           </span>
@@ -70,26 +70,26 @@ export default function VodIntel() {
             two entrance animations on the same content. */}
         <div>
           <Reveal>
-          <AngularPanel accent="signal" fill="bg-surface/85" innerClassName="overflow-hidden">
+          <AngularPanel accent="signal" fill="bg-surface" innerClassName="overflow-hidden">
             {/* The stage stays plain - the value is in the analysis layer, not
                 in custom video chrome. */}
-            <div className="scanlines relative flex aspect-video items-center justify-center bg-black">
+            <div className="scanlines relative flex aspect-video items-center justify-center bg-base">
               <div className="flex flex-col items-center gap-3 text-center">
                 <Film className="h-7 w-7 text-signal" />
                 <span className="font-display text-display-m font-semibold text-ink">{title}</span>
                 <span className="text-body-s text-ink-muted">{active.unit} footage</span>
               </div>
-              <div className="absolute left-4 top-4 rounded-base border border-line bg-base/70 px-2.5 py-1">
+              <div className="absolute left-4 top-4 rounded-base border border-surface bg-base px-2.5 py-1">
                 <span className="hud-label text-ink-muted">Review</span>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 border-t border-line px-4 py-2">
+            <div className="flex flex-wrap items-center gap-3 border-t border-surface px-4 py-2">
               <button
                 type="button"
                 onClick={() => setPlaying((v) => !v)}
                 aria-label={playing ? 'Pause' : 'Play'}
-                className="rounded-base p-2 text-ink transition-colors duration-100 hover:bg-raised"
+                className="rounded-base p-2 text-ink transition-colors duration-100 btn-press hover:bg-raised"
               >
                 {playing ? <Pause /> : <Play />}
               </button>
@@ -125,13 +125,13 @@ export default function VodIntel() {
                 {flagged.map((tag) => {
                   const dimension = tag.dimension ? dimensionOf('player', tag.dimension) : null
                   return (
-                    <li key={tag.id} className="rounded-base border border-line bg-raised/50 p-3">
+                    <li key={tag.id} className="rounded-base border border-surface bg-raised p-3">
                       <div className="font-mono text-mono-m text-signal">
                         {formatClock(tag.at)}
                       </div>
                       <div className="mt-1 text-body-m text-ink">{tag.label}</div>
                       {dimension && (
-                        <div className="mt-2 border-t border-line pt-2 text-body-s text-ink-muted">
+                        <div className="mt-2 border-t border-surface pt-2 text-body-s text-ink-muted">
                           Evidence for <span className="text-ink">{dimension.label}</span>
                         </div>
                       )}
@@ -139,7 +139,7 @@ export default function VodIntel() {
                   )
                 })}
               </ul>
-              <p className="mt-4 flex items-start gap-2 border-t border-line pt-3 text-body-s text-ink-muted">
+              <p className="mt-4 flex items-start gap-2 border-t border-surface pt-3 text-body-s text-ink-muted">
                 <Sparkle className="mt-0.5 shrink-0" />
                 Flags are proposals. Confirming or overriding one is what actually moves the
                 dimension it is filed under — the model does not get to grade itself.
@@ -152,7 +152,7 @@ export default function VodIntel() {
           <HudPanel className="flex h-full flex-col p-4">
             <HudSection eyebrow="Markers" title="On this VOD" />
 
-            <ul className="flex-1 divide-y divide-line">
+            <ul className="flex-1 divide-y divide-surface">
               {tags.map((tag) => {
                 const current = Math.abs(tag.at - position) < 3
                 const fromModel = tag.source === 'model'
@@ -162,12 +162,12 @@ export default function VodIntel() {
                     <button
                       type="button"
                       onClick={() => setPosition(tag.at)}
-                      className="flex w-full items-start gap-3 py-2.5 text-left transition-colors duration-100 hover:text-signal"
+                      className="flex w-full items-start gap-3 py-2.5 text-left transition-colors duration-100 btn-press hover:text-signal"
                     >
                       <span
                         aria-hidden="true"
                         className={`mt-1 h-4 w-0.5 shrink-0 ${
-                          current ? 'bg-ink' : fromModel ? 'bg-signal' : 'bg-ember/70'
+                          current ? 'bg-surface' : fromModel ? 'bg-signal' : 'bg-ember'
                         }`}
                       />
                       <span className="font-mono text-mono-m text-ink-muted">
@@ -188,14 +188,14 @@ export default function VodIntel() {
               })}
             </ul>
 
-            <form onSubmit={addTag} className="mt-4 border-t border-line pt-4">
+            <form onSubmit={addTag} className="mt-4 border-t border-surface pt-4">
               <HudLabel>Note at {formatClock(position)}</HudLabel>
               <input
                 id="tag-note"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="What happened here?"
-                className="mt-2 w-full rounded-base border border-line bg-raised px-3 py-2 text-body-m text-ink placeholder:text-ink-muted"
+                className="mt-2 w-full rounded-base border border-surface bg-raised px-3 py-2 text-body-m text-ink placeholder:text-ink-muted"
               />
               <Button variant="primary" className="mt-3 w-full" onClick={addTag}>
                 <Plus />

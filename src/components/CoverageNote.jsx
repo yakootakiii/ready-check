@@ -14,7 +14,7 @@ export function CoverageBadge({ game, className = '' }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-body-s ${coverage.text} ${
-        coverage.key === 'planned' ? 'border-line' : `${coverage.border}/50`
+        coverage.key === 'planned' ? 'border-surface' : `${coverage.border}/50`
       } ${className}`}
     >
       <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${coverage.bg}`} />
@@ -30,7 +30,7 @@ export default function CoverageNote({ game, className = '' }) {
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-base border border-line bg-surface/60 px-4 py-2.5 ${className}`}
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-base border border-surface bg-surface px-4 py-2.5 ${className}`}
     >
       <HudLabel className={coverage.text}>{coverage.label}</HudLabel>
       <span className="min-w-0 flex-1 text-body-s text-ink-muted">

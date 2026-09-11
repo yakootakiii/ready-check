@@ -15,15 +15,15 @@ const toneFor = (value, key) => {
   const strength = INVERTED_DIMENSIONS.has(key) ? 100 - value : value
   if (strength >= 78) return { text: 'text-edge', bar: 'bg-edge' }
   if (strength >= 55) return { text: 'text-ink', bar: 'bg-signal' }
-  if (strength >= 38) return { text: 'text-ink-muted', bar: 'bg-ink-muted' }
-  return { text: 'text-ember', bar: 'bg-ember' }
+  if (strength >= 38) return { text: 'text-ink-muted', bar: 'bg-raised' }
+  return { text: 'text-ink-muted', bar: 'bg-raised' }
 }
 
 /** A signed change chip. Neutral below the model's own noise floor. */
 export function DeltaChip({ delta, className = '' }) {
   if (delta === undefined || delta === null) return null
   const quiet = Math.abs(delta) < 2
-  const tone = quiet ? 'text-ink-muted' : delta > 0 ? 'text-edge' : 'text-ember'
+  const tone = quiet ? 'text-ink-muted' : delta > 0 ? 'text-edge' : 'text-ink-muted'
   return (
     <span className={`font-mono text-body-s ${tone} ${className}`}>
       {delta > 0 ? '+' : delta < 0 ? '−' : '±'}

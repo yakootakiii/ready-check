@@ -16,12 +16,12 @@ export default function Sidebar({ collapsed }) {
   return (
     <nav
       aria-label="Sections"
-      className={`hidden shrink-0 overflow-y-auto overflow-x-hidden border-r border-line bg-surface/85 py-4 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:block ${
+      className={`hidden shrink-0 overflow-y-auto overflow-x-hidden border-r border-surface bg-surface py-4 transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:block ${
         collapsed ? 'w-16' : 'w-56'
       }`}
     >
       {NAV_GROUPS.map((group, i) => (
-        <div key={group.module ?? 'root'} className={i > 0 ? 'mt-4 border-t border-line pt-4' : ''}>
+        <div key={group.module ?? 'root'} className={i > 0 ? 'mt-4 border-t border-surface pt-4' : ''}>
           {group.module && (
             // Height collapses too, so the groups keep their rhythm instead of
             // leaving invisible gaps in the narrow rail.
@@ -43,11 +43,11 @@ export default function Sidebar({ collapsed }) {
                   title={collapsed ? item.label : undefined}
                   className={({ isActive }) =>
                     [
-                      // Active row gets a signal left border, not a filled
-                      // background - keeps the rail quiet (spec §4).
+                      // Active row gets a green emphasis to bring the product's
+                      // energetic accent into the main system navigation.
                       'flex items-center gap-3 border-l-2 px-4 py-2 text-body-m transition-colors duration-100',
                       isActive
-                        ? 'border-signal text-ink'
+                        ? 'border-ember bg-[rgba(231,255,112,0.08)] text-ember'
                         : 'border-transparent text-ink-muted hover:text-ink',
                     ].join(' ')
                   }

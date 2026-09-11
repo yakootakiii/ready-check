@@ -34,7 +34,7 @@ import { tier as tierOf } from '../tiers'
 const VERDICT = {
   you: { label: 'Favourable', text: 'text-edge', rule: 'bg-edge' },
   them: { label: 'Difficult', text: 'text-ember', rule: 'bg-ember' },
-  even: { label: 'Even', text: 'text-ink-muted', rule: 'bg-line' },
+  even: { label: 'Even', text: 'text-ink-muted', rule: 'bg-surface' },
 }
 
 const verdictOf = (matchup) => {
@@ -118,7 +118,7 @@ function OpponentProfile({ team, onBack }) {
                   </InsightBullet>
                 ))}
               </ul>
-              <div className="mt-5 grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
+              <div className="mt-5 grid gap-4 border-t border-surface pt-4 sm:grid-cols-2">
                 <div>
                   <HudLabel>Expected tempo</HudLabel>
                   <p className="mt-1 font-mono text-mono-m text-ink">{m.expectedTempo.label}</p>
@@ -177,7 +177,7 @@ function OpponentProfile({ team, onBack }) {
             }
           />
           <Reveal>
-            <HudPanel className="divide-y divide-line p-2">
+            <HudPanel className="divide-y divide-surface p-2">
               {profile.roster.map((member) => {
                 const t = tierOf(member.tier)
                 return (
@@ -200,7 +200,7 @@ function OpponentProfile({ team, onBack }) {
               <p className="mt-2 text-body-m text-ink">
                 {team.name} wins by {theirs.winCondition}.
               </p>
-              <p className="mt-3 border-t border-line pt-3 text-body-s text-ink-muted">
+              <p className="mt-3 border-t border-surface pt-3 text-body-s text-ink-muted">
                 Modelled on {theirs.sample} analysed {game.unit.toLowerCase()}s. Confidence{' '}
                 {theirs.confidence}%.
               </p>
@@ -257,7 +257,7 @@ export default function Opponents() {
         title="Opponents"
         subtitle="Every side in the scene, read as a style. Ordered by how awkward each one is for your profile."
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -267,7 +267,7 @@ export default function Opponents() {
       <CoverageNote game={active} />
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
           <Search className="shrink-0 text-ink-muted" />
           <span className="sr-only">Search opponents</span>
           <input
@@ -321,7 +321,7 @@ export default function Opponents() {
 
                     <DnaStrip dna={row.dna} className="mt-4" />
 
-                    <span className="mt-4 block space-y-1.5 border-t border-line pt-3">
+                    <span className="mt-4 block space-y-1.5 border-t border-surface pt-3">
                       {concern && (
                         <span className="block text-body-s text-ink-muted">
                           <span className="text-ember">Concern</span> · {concern.label} (

@@ -35,7 +35,7 @@ import { player } from '../data/mock'
  */
 
 const VERDICTS = {
-  confirmed: { label: 'Confirmed', tone: 'muted', text: 'text-ink-muted', bar: 'bg-ink-muted' },
+  confirmed: { label: 'Confirmed', tone: 'muted', text: 'text-ink-muted', bar: 'bg-surface-muted' },
   shifted: { label: 'Shifted', tone: 'signal', text: 'text-signal', bar: 'bg-signal' },
   surprise: { label: 'Surprise', tone: 'ember', text: 'text-ember', bar: 'bg-ember' },
 }
@@ -58,7 +58,7 @@ export default function MatchAnalysis() {
         title="Match analysis"
         subtitle="What the model expected, what the opponent actually did, and what changed because of it."
         action={
-          <span className="flex items-center gap-2 rounded-base border border-line bg-surface/85 px-3 py-2 text-body-m text-ink-muted">
+          <span className="flex items-center gap-2 rounded-base border border-surface bg-surface px-3 py-2 text-body-m text-ink-muted">
             <GameTile game={active} size="s" />
             {active.name}
           </span>
@@ -91,7 +91,7 @@ export default function MatchAnalysis() {
         {/* Which match ------------------------------------------------------ */}
         <section>
           <HudSection eyebrow="Recent" title="Matches" />
-          <HudPanel className="divide-y divide-line p-2">
+          <HudPanel className="divide-y divide-surface p-2">
             {matches.map((row) => {
               const selected = row.id === match.id
               return (
@@ -100,8 +100,8 @@ export default function MatchAnalysis() {
                   type="button"
                   onClick={() => setMatchId(row.id)}
                   aria-current={selected ? 'true' : undefined}
-                  className={`flex w-full items-center gap-3 rounded-base px-3 py-3 text-left transition-colors duration-100 ${
-                    selected ? 'bg-raised' : 'hover:bg-raised/60'
+                  className={`flex w-full items-center gap-3 rounded-base px-3 py-3 text-left transition-colors duration-100 btn-press ${
+                    selected ? 'bg-raised' : 'hover:bg-raised'
                   }`}
                 >
                   <span
@@ -172,7 +172,7 @@ export default function MatchAnalysis() {
                           </span>
                         </div>
                         <div className="mt-1.5">
-                          <StatBar pct={observation.predicted} color="bg-ink-muted" delay={120} />
+                          <StatBar pct={observation.predicted} color="bg-surface-muted" delay={120} />
                         </div>
                       </div>
                       <div>
@@ -192,7 +192,7 @@ export default function MatchAnalysis() {
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-1.5 border-t border-line pt-3">
+                    <div className="mt-4 space-y-1.5 border-t border-surface pt-3">
                       <p className="text-body-m text-ink-muted">{observation.expectation}</p>
                       <p className="text-body-m text-ink">{observation.reality}</p>
                     </div>
@@ -232,7 +232,7 @@ export default function MatchAnalysis() {
 
             <Reveal delay={80}>
               <HudPanel className="h-full p-5">
-                <HudLabel className="text-ember">Mistakes</HudLabel>
+                <HudLabel className="text-ink-muted">Mistakes</HudLabel>
                 <ul className="mt-3 space-y-2">
                   {debrief.mistakes.map((item) => (
                     <InsightBullet key={item} tone="ember">
@@ -256,7 +256,7 @@ export default function MatchAnalysis() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-3 border-t border-line pt-3 text-body-s text-ink-muted">
+                <p className="mt-3 border-t border-surface pt-3 text-body-s text-ink-muted">
                   One match moves a dimension by a point or two. Anything larger would be
                   fitting noise.
                 </p>

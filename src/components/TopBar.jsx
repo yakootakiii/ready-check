@@ -26,14 +26,14 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
   const liveMatch = liveMatchesFor(activeGame.id)[0]
 
   return (
-    <header className="z-20 shrink-0 border-b border-line bg-base/90">
+    <header className="z-20 shrink-0 border-b border-surface bg-base">
       <div className="flex h-14 items-center gap-4 px-4">
         <button
           type="button"
           onClick={onToggleRail}
           aria-label={railCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!railCollapsed}
-          className="hidden rounded-base p-2 text-ink-muted transition-colors duration-100 hover:bg-raised hover:text-ink md:block"
+          className="hidden rounded-base p-2 text-ink-muted transition-colors duration-100 hover:bg-raised hover:text-ink md:block btn-press"
         >
           <Menu
             className={`transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -60,7 +60,7 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
               end={link.end}
               className={({ isActive }) =>
                 `rounded-base px-3 py-1.5 text-body-m transition-colors duration-100 ${
-                  isActive ? 'text-ink' : 'text-ink-muted hover:text-ink'
+                  isActive ? 'text-ember' : 'text-ink-muted hover:text-ember'
                 }`
               }
             >
@@ -74,18 +74,18 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
           <button
             type="button"
             aria-label="Notifications, 3 unread"
-            className="relative rounded-base p-2 text-ink-muted transition-colors duration-100 hover:bg-raised hover:text-ink"
+            className="relative rounded-base p-2 text-ink-muted transition-colors duration-100 hover:bg-raised hover:text-ink btn-press"
           >
             <Bell />
             <span
               aria-hidden="true"
-              className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-ember"
+              className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-signal"
             />
           </button>
           <NavLink
             to="/passport"
             aria-label={`Competitive passport, ${player.fullName}`}
-            className="flex h-8 w-8 items-center justify-center rounded-base border border-line bg-raised font-display text-body-m font-semibold text-ink"
+            className="flex h-8 w-8 items-center justify-center rounded-base border border-surface bg-raised font-display text-body-m font-semibold text-ink btn-press"
           >
             KR
           </NavLink>
@@ -96,16 +96,16 @@ export default function TopBar({ onToggleRail, railCollapsed = false }) {
           Slides in once on state change and then sits quiet - a strip that
           kept pulsing for the next two hours of play would be noise. */}
       {isLive && (
-        <div className="animate-live-strip-in border-t border-line bg-base px-4 py-1.5 md:p-0">
+        <div className="animate-live-strip-in border-t border-surface bg-base px-4 py-1.5 md:p-0">
           {/* A persistent pill on mobile, a full-width strip from md up
               (spec §8). */}
           <button
             type="button"
             onClick={() => navigate('/compete/matches')}
-            className="flex w-full items-center gap-3 rounded-full border border-line bg-surface px-3 py-1.5 text-left transition-colors duration-100 hover:bg-raised md:rounded-none md:border-0 md:px-4"
+            className="flex w-full items-center gap-3 rounded-full border border-surface bg-surface px-3 py-1.5 text-left transition-colors duration-100 hover:bg-raised md:rounded-none md:border-0 md:px-4"
           >
-            <span className="flex shrink-0 items-center gap-2 text-body-s font-medium text-ember">
-              <LivePip />
+            <span className="flex shrink-0 items-center gap-2 text-body-s font-medium text-edge">
+              <LivePip className="text-edge" />
               Live
             </span>
             <span className="font-mono text-mono-m text-ink">

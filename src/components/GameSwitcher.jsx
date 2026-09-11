@@ -75,14 +75,14 @@ export default function GameSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="flex items-center gap-2 rounded-base border border-line bg-raised px-2.5 py-1.5 text-body-m text-ink transition-colors duration-100 hover:border-signal/60"
+        className="flex items-center gap-2 rounded-base border border-surface bg-raised px-2.5 py-1.5 text-body-m text-ink transition-colors duration-100 hover:border-edge btn-press"
       >
         {game ? (
           <GameTile game={game} size="s" />
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-7 w-7 items-center justify-center border border-line font-display text-body-s font-bold text-ink-muted"
+            className="flex h-7 w-7 items-center justify-center border border-surface font-display text-body-s font-bold text-ink-muted"
             style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 78%, 78% 100%, 0 100%, 0 22%)' }}
           >
             ALL
@@ -100,9 +100,9 @@ export default function GameSwitcher() {
         <div
           role="dialog"
           aria-label="Choose a game"
-          className="absolute right-0 z-30 mt-2 max-h-[70vh] w-[22rem] overflow-y-auto rounded-base border border-line bg-raised p-2 shadow-glow-signal"
+          className="absolute right-0 z-30 mt-2 max-h-[70vh] w-[22rem] overflow-y-auto rounded-base border border-surface bg-raised p-2 shadow-glow-signal"
         >
-          <label className="mb-2 flex items-center gap-2 rounded-base border border-line bg-base px-2.5 py-2">
+          <label className="mb-2 flex items-center gap-2 rounded-base border border-surface bg-base px-2.5 py-2">
             <Search className="shrink-0 text-ink-muted" />
             <span className="sr-only">Search games</span>
             <input
@@ -123,7 +123,7 @@ export default function GameSwitcher() {
           >
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 items-center justify-center border border-line font-display text-body-s font-bold"
+              className="flex h-8 w-8 items-center justify-center border border-surface font-display text-body-s font-bold"
               style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 78%, 78% 100%, 0 100%, 0 22%)' }}
             >
               ALL
@@ -134,7 +134,7 @@ export default function GameSwitcher() {
                 Everything across {GAMES.length} titles · {modelledCount} modelled
               </span>
             </span>
-            {isAll && <span className="text-signal">●</span>}
+            {isAll && <span className="text-edge">●</span>}
           </button>
 
           {groups.map((group) => (
@@ -149,7 +149,7 @@ export default function GameSwitcher() {
                     key={g.id}
                     type="button"
                     onClick={() => choose(g.id)}
-                    className="flex w-full items-center gap-3 rounded-base px-2 py-2 text-left transition-colors duration-100 hover:bg-surface"
+                    className="flex w-full items-center gap-3 rounded-base px-2 py-2 text-left transition-colors duration-100 hover:bg-surface btn-press"
                   >
                     <GameTile game={g} size="s" />
                     <span className="min-w-0 flex-1">
@@ -160,7 +160,7 @@ export default function GameSwitcher() {
                       </span>
                     </span>
                     <CoverageBadge game={g} className="shrink-0" />
-                    {selected && <span className="text-signal">●</span>}
+                    {selected && <span className="text-edge">●</span>}
                   </button>
                 )
               })}

@@ -55,9 +55,9 @@ export default function CompetitiveIdentity({ dna, size = 'm', showWeakness = fa
  * itself as settled.
  */
 export function ConfidenceMeter({ dna, className = '' }) {
-  const tone = dna.confidence >= 80 ? 'bg-edge' : dna.confidence >= 62 ? 'bg-signal' : 'bg-ember'
+  const tone = dna.confidence >= 80 ? 'bg-edge' : dna.confidence >= 62 ? 'bg-signal' : 'bg-raised'
   const textTone =
-    dna.confidence >= 80 ? 'text-edge' : dna.confidence >= 62 ? 'text-signal' : 'text-ember'
+    dna.confidence >= 80 ? 'text-edge' : dna.confidence >= 62 ? 'text-signal' : 'text-ink-muted'
 
   return (
     <div className={className}>

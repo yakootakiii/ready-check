@@ -25,7 +25,7 @@
 export const GENRES = {
   tactical: { label: 'Tactical FPS', text: 'text-signal', bg: 'bg-signal', border: 'border-signal' },
   moba: { label: 'MOBA', text: 'text-diamond', bg: 'bg-diamond', border: 'border-diamond' },
-  br: { label: 'Battle royale', text: 'text-ember', bg: 'bg-ember', border: 'border-ember' },
+  br: { label: 'Battle royale', text: 'text-ink-muted', bg: 'bg-raised', border: 'border-surface' },
   fighting: { label: 'Fighting', text: 'text-gold', bg: 'bg-gold', border: 'border-gold' },
   sports: { label: 'Sports', text: 'text-platinum', bg: 'bg-platinum', border: 'border-platinum' },
   strategy: { label: 'Strategy', text: 'text-silver', bg: 'bg-silver', border: 'border-silver' },
@@ -285,7 +285,7 @@ export const COVERAGE = {
     short: 'Planned',
     note: 'Ladders, teams and tournaments are covered. Behavioural modelling is not live yet.',
     text: 'text-ink-muted',
-    border: 'border-line',
+    border: 'border-surface',
     bg: 'bg-raised',
   },
 }

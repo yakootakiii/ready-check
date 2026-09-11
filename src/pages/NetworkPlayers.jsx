@@ -78,7 +78,7 @@ export default function NetworkPlayers() {
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-line bg-surface/85 px-3 py-2">
+        <label className="flex min-w-56 flex-1 items-center gap-3 rounded-base border border-surface bg-surface px-3 py-2">
           <Search className="shrink-0 text-ink-muted" />
           <span className="sr-only">Search players</span>
           <input
@@ -100,7 +100,7 @@ export default function NetworkPlayers() {
       {rows.length === 0 ? (
         <EmptyState title="No player matches that search." hint="Try a role, or a team name." />
       ) : (
-        <HudPanel className="divide-y divide-line p-2">
+        <HudPanel className="divide-y divide-surface p-2">
           {rows.map((row, i) => {
             const t = tierOf(row.tier)
             const g = GAMES_BY_ID[row.gameId]
@@ -109,7 +109,7 @@ export default function NetworkPlayers() {
                 <button
                   type="button"
                   onClick={() => navigate(`/passport/${row.id}`)}
-                  className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-base px-3 py-3 text-left transition-colors duration-100 hover:bg-raised"
+                  className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-base px-3 py-3 text-left transition-colors duration-100 btn-press hover:bg-raised"
                 >
                   <span className="w-6 shrink-0 font-display text-display-m font-bold text-ink-muted">
                     {i + 1}
