@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import GameTile from '../components/GameTile'
 import Reveal from '../components/Reveal'
 import InsightCard, { InsightBullet } from '../components/InsightCard'
+import InfoTip from '../components/InfoTip'
 import CoverageNote from '../components/CoverageNote'
 import { DeltaChip } from '../components/DnaDimensions'
 import {
@@ -268,10 +269,10 @@ export default function MatchAnalysis() {
 
       <Reveal>
         <HudPanel className="flex flex-wrap items-center justify-between gap-4 p-5">
-          <p className="flex items-start gap-2 text-body-m text-ink-muted">
-            <Cpu className="mt-1 shrink-0" />
-            Every debrief on this page feeds the engine that built both profiles. The next
-            matchup read is computed after these updates, not before them.
+          <p className="flex items-center gap-2 text-body-m text-ink-muted">
+            <Cpu className="shrink-0" />
+            Feeds directly into your next matchup read.
+            <InfoTip text="Every debrief on this page updates the engine that built both profiles, before the next matchup is computed." />
           </p>
           <Button onClick={() => navigate('/matchup')}>
             <Sparkle />

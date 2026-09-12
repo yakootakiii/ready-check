@@ -7,6 +7,7 @@ import DnaRadar, { RadarLegend } from '../components/DnaRadar'
 import MatchupBars from '../components/MatchupBars'
 import HeadToHead from '../components/HeadToHead'
 import InsightCard, { InsightBullet } from '../components/InsightCard'
+import InfoTip from '../components/InfoTip'
 import CoverageNote from '../components/CoverageNote'
 import {
   AnimatedNumber,
@@ -188,10 +189,9 @@ export default function Matchup() {
                 youLabel={m.mine.name}
                 themLabel={fixture.opponent.name}
               />
-              <p className="mt-5 border-t border-surface pt-4 text-body-s text-ink-muted">
-                A gap under six points is inside the model's own noise and is shown as even —
-                putting a recommendation on top of a rounding error is how analytics products
-                lose a coach's trust.
+              <p className="mt-5 flex items-center gap-1.5 border-t border-surface pt-4 text-body-s text-ink-muted">
+                Gaps under 6 pts read as even
+                <InfoTip text="That's inside the model's own noise — a recommendation on top of a rounding error is how analytics products lose a coach's trust." />
               </p>
             </HudPanel>
           </Reveal>

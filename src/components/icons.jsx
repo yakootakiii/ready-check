@@ -239,3 +239,10 @@ export const Clock = (p) => (
     <path d="M8 4.8V8.3l2.3 1.4" />
   </svg>
 )
+
+export const Info = (p) => (
+  <svg {...base} {...p}>
+    <circle cx="8" cy="8" r="5.75" />
+    <path d="M8 7.2v3.6M8 5.3h.01" />
+  </svg>
+)

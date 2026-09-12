@@ -5,6 +5,7 @@ import NetworkTabs from '../components/NetworkTabs'
 import Reveal from '../components/Reveal'
 import { DnaStrip } from '../components/DnaDimensions'
 import InsightCard, { InsightBullet } from '../components/InsightCard'
+import InfoTip from '../components/InfoTip'
 import CoverageNote from '../components/CoverageNote'
 import { FormRow, HudLabel, HudPageHeader, HudPanel, HudSection, StatBar } from '../components/hud'
 import { Button, EmptyState } from '../components/ui'
@@ -378,8 +379,8 @@ export default function Talent() {
 
       <p className="mt-8 flex items-center gap-2 text-body-s text-ink-muted">
         <Sparkle />
-        Fit is a compatibility read, not a rating. It answers "does this profile close what this
-        roster is missing", which is a different question from "who is the best player available".
+        Fit is compatibility, not rank.
+        <InfoTip text="It answers whether a profile closes what a roster is missing — a different question from who is the best player available." />
         <Button variant="ghost" onClick={() => navigate('/analyze')} className="px-2 py-0">
           How DNA is built
           <ArrowRight />
